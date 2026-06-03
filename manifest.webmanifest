@@ -1,0 +1,18 @@
+{
+  "name": "FitFuel Tracker",
+  "short_name": "FitFuel",
+  "description": "PWA voor gymtracking, voeding, macro's en progressie.",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#060606",
+  "theme_color": "#060606",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

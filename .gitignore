@@ -1,0 +1,5 @@
+.DS_Store
+.cert/
+node_modules/
+*.log
+preview.png

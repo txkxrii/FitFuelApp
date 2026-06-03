@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#060606">
+    <meta name="description" content="PWA voor gymtracking, voeding, macro's en progressie.">
+    <title>FitFuel Tracker</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="icons/icon.svg">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Hoofdnavigatie">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">
+            <span></span>
+          </div>
+          <div>
+            <strong>FitFuel</strong>
+            <small>Gym & Foodtracker</small>
+          </div>
+        </div>
+
+        <div class="install-panel">
+          <p>Installeer als app zodra je browser dit aanbiedt.</p>
+          <button class="ghost-button" id="installButton" type="button" hidden>Installeren</button>
+        </div>
+      </aside>
+
+      <nav class="nav-tabs" aria-label="App onderdelen">
+        <button class="nav-tab active" type="button" data-view="dashboard" aria-pressed="true">
+          <span class="icon" aria-hidden="true">⌂</span>
+          Dashboard
+        </button>
+        <button class="nav-tab" type="button" data-view="food" aria-pressed="false">
+          <span class="icon" aria-hidden="true">◌</span>
+          Food
+        </button>
+        <button class="nav-tab" type="button" data-view="gym" aria-pressed="false">
+          <span class="icon" aria-hidden="true">▥</span>
+          Gym
+        </button>
+        <button class="nav-tab" type="button" data-view="progress" aria-pressed="false">
+          <span class="icon" aria-hidden="true">⌁</span>
+          Progressie
+        </button>
+        <button class="nav-tab" type="button" data-view="profile" aria-pressed="false">
+          <span class="icon" aria-hidden="true">□</span>
+          Profiel
+        </button>
+      </nav>
+
+      <main class="content">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Vandaag</p>
+            <h1 id="pageTitle">Dashboard</h1>
+          </div>
+          <div class="date-pill" id="todayLabel"></div>
+        </header>
+
+        <section class="view active" id="dashboard" aria-labelledby="dashboard-title">
+          <div class="hero-band">
+            <div>
+              <p class="eyebrow">Dagstatus</p>
+              <h2 id="dashboard-title">Je training en voeding in een overzicht</h2>
+              <p class="hero-copy">Log je maaltijden, sets en lichaamsgewicht. De app rekent je calorieen, macro's en trainingsvolume direct bij.</p>
+            </div>
+            <div class="plate-visual" aria-hidden="true">
+              <div class="plate">
+                <span class="protein"></span>
+                <span class="carbs"></span>
+                <span class="fat"></span>
+              </div>
+              <div class="barbell">
+                <span></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="stats-grid">
+            <article class="stat-card">
+              <span>Calorieen</span>
+              <strong><output id="caloriesOut">0</output></strong>
+              <small><span id="caloriesLeftOut">0</span> over van doel</small>
+              <div class="meter"><span id="calorieMeter"></span></div>
+            </article>
+            <article class="stat-card">
+              <span>Eiwitten</span>
+              <strong><output id="proteinOut">0</output>g</strong>
+              <small>Doel: <span id="proteinGoalOut">160</span>g</small>
+              <div class="meter"><span id="proteinMeter"></span></div>
+            </article>
+            <article class="stat-card">
+              <span>Trainingsvolume</span>
+              <strong><output id="volumeOut">0</output>kg</strong>
+              <small>Vandaag gelogd</small>
+              <div class="meter accent"><span id="volumeMeter"></span></div>
+            </article>
+            <article class="stat-card">
+              <span>Laatste gewicht</span>
+              <strong><output id="weightOut">-</output></strong>
+              <small><span id="weightTrendOut">Nog geen trend</span></small>
+              <div class="meter green"><span id="weightMeter"></span></div>
+            </article>
+          </div>
+
+          <div class="graph-grid">
+            <section class="panel graph-panel">
+              <h2>Macro verdeling</h2>
+              <div class="macro-chart" id="macroChart"></div>
+            </section>
+            <section class="panel graph-panel">
+              <h2>Calorieen per dag</h2>
+              <div class="mini-chart" id="calorieChart" aria-label="Grafiek met calorieen per dag"></div>
+            </section>
+            <section class="panel graph-panel">
+              <h2>Workout volume</h2>
+              <div class="mini-chart" id="volumeChart" aria-label="Grafiek met trainingsvolume per dag"></div>
+            </section>
+          </div>
+
+          <div class="two-column">
+            <section class="panel">
+              <div class="panel-head">
+                <h2>Maaltijden vandaag</h2>
+                <button class="text-button" type="button" data-shortcut="food">Toevoegen</button>
+              </div>
+              <div class="list" id="todayMeals"></div>
+            </section>
+            <section class="panel">
+              <div class="panel-head">
+                <h2>Workouts vandaag</h2>
+                <button class="text-button" type="button" data-shortcut="gym">Toevoegen</button>
+              </div>
+              <div class="list" id="todayWorkouts"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="food" aria-labelledby="food-title">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Foodtracker</p>
+              <h2 id="food-title">Maaltijd toevoegen</h2>
+            </div>
+          </div>
+
+          <section class="panel scanner-card">
+            <div class="panel-head">
+              <div>
+                <h2>Barcode scanner</h2>
+              <p class="panel-copy">Scan live, maak een foto of vul de barcode in.</p>
+              </div>
+              <button class="text-button" id="startScanner" type="button">Scan</button>
+            </div>
+            <div class="scanner-box" id="scannerBox" hidden>
+              <div class="video-frame">
+                <div class="html5-scanner" id="html5Scanner" hidden></div>
+                <video id="scannerVideo" muted playsinline></video>
+                <span class="scan-line" aria-hidden="true"></span>
+              </div>
+              <div class="scanner-actions">
+                <input id="barcodeInput" inputmode="numeric" autocomplete="off" placeholder="Barcode handmatig">
+                <button class="ghost-button small" id="lookupBarcode" type="button">Zoeken</button>
+                <label class="ghost-button small file-scan-button">Foto
+                  <input id="barcodeImageInput" type="file" accept="image/*" capture="environment" hidden>
+                </label>
+                <button class="ghost-button small" id="stopScanner" type="button">Stop</button>
+              </div>
+              <p class="scanner-status" id="scannerStatus">Richt je camera op de barcode.</p>
+              <div class="scanner-result" id="scannerResult"></div>
+            </div>
+          </section>
+
+          <form class="form-grid" id="mealForm">
+            <label>Maaltijd
+              <select name="type">
+                <option>Ontbijt</option>
+                <option>Lunch</option>
+                <option>Diner</option>
+                <option>Snack</option>
+              </select>
+            </label>
+            <label>Naam
+              <input name="name" required placeholder="Bijv. kip met rijst">
+            </label>
+            <label>Calorieen
+              <input name="calories" type="number" min="0" step="1" required placeholder="520">
+            </label>
+            <label>Eiwit g
+              <input name="protein" type="number" min="0" step="1" required placeholder="38">
+            </label>
+            <label>Koolhydraten g
+              <input name="carbs" type="number" min="0" step="1" required placeholder="62">
+            </label>
+            <label>Vet g
+              <input name="fat" type="number" min="0" step="1" required placeholder="14">
+            </label>
+            <input name="barcode" type="hidden">
+            <button class="primary-button" type="submit">Maaltijd opslaan</button>
+          </form>
+
+          <section class="panel">
+            <div class="panel-head">
+              <h2>Food log</h2>
+              <button class="ghost-button small" type="button" id="clearMeals">Food wissen</button>
+            </div>
+            <div class="list" id="mealList"></div>
+          </section>
+        </section>
+
+        <section class="view" id="gym" aria-labelledby="gym-title">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Gymtracker</p>
+              <h2 id="gym-title">Workout loggen</h2>
+            </div>
+          </div>
+
+          <form class="form-grid" id="workoutForm">
+            <label>Workout
+              <input name="workout" required placeholder="Bijv. Push day">
+            </label>
+            <label>Oefening
+              <input name="exercise" required placeholder="Bijv. bench press">
+            </label>
+            <label>Sets
+              <input name="sets" type="number" min="1" step="1" required placeholder="4">
+            </label>
+            <label>Reps
+              <input name="reps" type="number" min="1" step="1" required placeholder="8">
+            </label>
+            <label>Gewicht kg
+              <input name="weight" type="number" min="0" step="0.5" required placeholder="70">
+            </label>
+            <label>Rust sec
+              <input name="rest" type="number" min="0" step="5" placeholder="90">
+            </label>
+            <button class="primary-button" type="submit">Workout opslaan</button>
+          </form>
+
+          <section class="panel">
+            <div class="panel-head">
+              <h2>Workout log</h2>
+              <button class="ghost-button small" type="button" id="clearWorkouts">Workouts wissen</button>
+            </div>
+            <div class="list" id="workoutList"></div>
+          </section>
+        </section>
+
+        <section class="view" id="progress" aria-labelledby="progress-title">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Progressie</p>
+              <h2 id="progress-title">Gewicht en prestaties</h2>
+            </div>
+          </div>
+
+          <form class="form-grid compact" id="weightForm">
+            <label>Gewicht kg
+              <input name="weight" type="number" min="20" step="0.1" required placeholder="82.5">
+            </label>
+            <label>Notitie
+              <input name="note" placeholder="Bijv. ochtendweging">
+            </label>
+            <button class="primary-button" type="submit">Gewicht opslaan</button>
+          </form>
+
+          <div class="two-column">
+            <section class="panel">
+              <h2>Gewichtstrend</h2>
+              <div class="chart" id="weightChart" aria-label="Grafiek met gewichtstrend"></div>
+            </section>
+            <section class="panel">
+              <h2>Macro's vandaag</h2>
+              <div class="macro-chart large" id="progressMacroChart"></div>
+            </section>
+          </div>
+
+          <div class="two-column">
+            <section class="panel">
+              <h2>Calorie trend</h2>
+              <div class="mini-chart" id="progressCalorieChart" aria-label="Grafiek met calorie trend"></div>
+            </section>
+            <section class="panel">
+              <h2>Persoonlijke records</h2>
+              <div class="list" id="recordList"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="profile" aria-labelledby="profile-title">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Profiel</p>
+              <h2 id="profile-title">Doelen instellen</h2>
+            </div>
+          </div>
+
+          <form class="form-grid" id="profileForm">
+            <label>Naam
+              <input name="name" required placeholder="Jouw naam">
+            </label>
+            <label>Doel
+              <select name="goal">
+                <option value="Afvallen">Afvallen</option>
+                <option value="Spiermassa opbouwen">Spiermassa opbouwen</option>
+                <option value="Onderhoud">Onderhoud</option>
+                <option value="Fitter worden">Fitter worden</option>
+              </select>
+            </label>
+            <label>Lengte cm
+              <input name="height" type="number" min="120" step="1" placeholder="180">
+            </label>
+            <label>Startgewicht kg
+              <input name="startWeight" type="number" min="20" step="0.1" placeholder="82">
+            </label>
+            <label>Caloriedoel
+              <input name="calorieGoal" type="number" min="1000" step="10" required>
+            </label>
+            <label>Eiwitdoel g
+              <input name="proteinGoal" type="number" min="40" step="1" required>
+            </label>
+            <label>Koolhydraatdoel g
+              <input name="carbsGoal" type="number" min="40" step="1" required>
+            </label>
+            <label>Vetdoel g
+              <input name="fatGoal" type="number" min="20" step="1" required>
+            </label>
+            <button class="primary-button" type="submit">Profiel opslaan</button>
+          </form>
+        </section>
+      </main>
+    </div>
+
+    <script src="app.js" defer></script>
+  </body>
+</html>
