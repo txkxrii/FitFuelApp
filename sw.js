@@ -1,4 +1,4 @@
-const CACHE_NAME = "fitfuel-pwa-v11";
+const CACHE_NAME = "fitfuel-pwa-v17";
 const ASSETS = [
   "./",
   "./index.html",

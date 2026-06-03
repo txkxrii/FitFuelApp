@@ -1,5 +1,6 @@
 const todayKey = new Date().toISOString().slice(0, 10);
 const storageKey = "fitfuel-pwa-state";
+const settingsKey = "fitfuel-pwa-settings";
 
 const defaultState = {
   profile: {
@@ -25,20 +26,383 @@ const defaultState = {
 
 let installPrompt = null;
 let state = loadState();
+let uiSettings = loadUiSettings();
 let scannerStream = null;
 let scannerActive = false;
 let detector = null;
 let html5Scanner = null;
 let html5ScannerRunning = false;
 let scannerLibraryPromise = null;
+let selectedProgramId = "beginner";
 
 const views = {
   dashboard: "Dashboard",
   food: "Foodtracker",
   gym: "Gymtracker",
   progress: "Progressie",
+  plan: "Plan",
   profile: "Profiel"
 };
+
+const trainingOptions = [
+  {
+    id: "strength",
+    title: "Krachtgym",
+    tag: "Spiermassa",
+    match: ["strength", "fatloss"],
+    details: "Kies een gym met squat rack, benches, dumbbells tot minimaal 40kg en vrije gewichten.",
+    search: "kracht gym"
+  },
+  {
+    id: "pilates",
+    title: "Pilates studio",
+    tag: "Core & houding",
+    match: ["pilates", "fatloss"],
+    details: "Zoek reformer pilates als je begeleiding en weerstand wilt. Mat pilates is laagdrempeliger.",
+    search: "pilates studio"
+  },
+  {
+    id: "hyrox",
+    title: "Hyrox training",
+    tag: "Conditie & kracht",
+    match: ["hyrox", "fatloss"],
+    details: "Let op sled push/pull, ski-erg, rower, wall balls en functionele groepslessen.",
+    search: "hyrox gym"
+  },
+  {
+    id: "crossfit",
+    title: "Functional training",
+    tag: "Explosief",
+    match: ["hyrox", "strength"],
+    details: "Sterk alternatief als je met coaches, intervals en compound bewegingen wilt trainen.",
+    search: "functional training gym"
+  }
+];
+
+const gymPrograms = [
+  {
+    id: "beginner",
+    title: "Beginner",
+    frequency: "3 dagen per week",
+    goal: "Techniek, basisconditie en full-body kracht",
+    note: "Rust minimaal 1 dag tussen sessies. Start licht en verhoog pas als je reps strak blijven.",
+    days: [
+      {
+        title: "Full body A",
+        exercises: [
+          { name: "Goblet squat", sets: "3", reps: "10", focus: "benen" },
+          { name: "Dumbbell bench press", sets: "3", reps: "10", focus: "borst" },
+          { name: "Lat pulldown", sets: "3", reps: "12", focus: "rug" },
+          { name: "Romanian deadlift", sets: "3", reps: "10", focus: "hamstrings" },
+          { name: "Plank", sets: "3", reps: "30 sec", focus: "core" }
+        ]
+      },
+      {
+        title: "Full body B",
+        exercises: [
+          { name: "Leg press", sets: "3", reps: "12", focus: "benen" },
+          { name: "Seated row", sets: "3", reps: "12", focus: "rug" },
+          { name: "Shoulder press machine", sets: "3", reps: "10", focus: "schouders" },
+          { name: "Hamstring curl", sets: "3", reps: "12", focus: "hamstrings" },
+          { name: "Cable crunch", sets: "3", reps: "12", focus: "core" }
+        ]
+      },
+      {
+        title: "Full body C",
+        exercises: [
+          { name: "Squat patroon", sets: "3", reps: "8", focus: "benen" },
+          { name: "Incline dumbbell press", sets: "3", reps: "10", focus: "borst" },
+          { name: "Assisted pull-up", sets: "3", reps: "8", focus: "rug" },
+          { name: "Hip thrust", sets: "3", reps: "10", focus: "glutes" },
+          { name: "Side plank", sets: "3", reps: "30 sec", focus: "core" }
+        ]
+      }
+    ]
+  },
+  {
+    id: "intermediate",
+    title: "Intermediate",
+    frequency: "4 dagen per week",
+    goal: "Meer volume met upper/lower split",
+    note: "Train met 1 tot 2 reps in reserve. Houd progressie bij per oefening.",
+    days: [
+      {
+        title: "Upper 1",
+        exercises: [
+          { name: "Bench press", sets: "4", reps: "6-8", focus: "borst" },
+          { name: "Barbell row", sets: "4", reps: "8", focus: "rug" },
+          { name: "Overhead press", sets: "3", reps: "8", focus: "schouders" },
+          { name: "Lat pulldown", sets: "3", reps: "10", focus: "rug" },
+          { name: "Triceps rope pushdown", sets: "3", reps: "12", focus: "triceps" },
+          { name: "Dumbbell curl", sets: "3", reps: "12", focus: "biceps" }
+        ]
+      },
+      {
+        title: "Lower 1",
+        exercises: [
+          { name: "Back squat", sets: "4", reps: "6-8", focus: "benen" },
+          { name: "Romanian deadlift", sets: "4", reps: "8", focus: "hamstrings" },
+          { name: "Leg press", sets: "3", reps: "10", focus: "quads" },
+          { name: "Leg curl", sets: "3", reps: "12", focus: "hamstrings" },
+          { name: "Calf raise", sets: "4", reps: "12", focus: "kuiten" }
+        ]
+      },
+      {
+        title: "Upper 2",
+        exercises: [
+          { name: "Incline dumbbell press", sets: "4", reps: "8", focus: "borst" },
+          { name: "Pull-up of assisted pull-up", sets: "4", reps: "6-10", focus: "rug" },
+          { name: "Seated cable row", sets: "3", reps: "10", focus: "rug" },
+          { name: "Lateral raise", sets: "4", reps: "12", focus: "schouders" },
+          { name: "Face pull", sets: "3", reps: "15", focus: "achterkant schouder" }
+        ]
+      },
+      {
+        title: "Lower 2",
+        exercises: [
+          { name: "Deadlift", sets: "3", reps: "5", focus: "posterior chain" },
+          { name: "Front squat", sets: "3", reps: "8", focus: "quads" },
+          { name: "Bulgarian split squat", sets: "3", reps: "10 per kant", focus: "benen" },
+          { name: "Hip thrust", sets: "3", reps: "10", focus: "glutes" },
+          { name: "Hanging knee raise", sets: "3", reps: "12", focus: "core" }
+        ]
+      }
+    ]
+  },
+  {
+    id: "advanced",
+    title: "Advanced",
+    frequency: "5-6 dagen per week",
+    goal: "Push/pull/legs met hogere intensiteit",
+    note: "Gebruik dit alleen als herstel, slaap en voeding op orde zijn. Deload elke 4 tot 6 weken.",
+    days: [
+      {
+        title: "Push kracht",
+        exercises: [
+          { name: "Bench press", sets: "5", reps: "5", focus: "borst" },
+          { name: "Incline press", sets: "4", reps: "8", focus: "borst" },
+          { name: "Weighted dips", sets: "3", reps: "8", focus: "borst/triceps" },
+          { name: "Shoulder press", sets: "4", reps: "6", focus: "schouders" },
+          { name: "Lateral raise", sets: "4", reps: "15", focus: "schouders" },
+          { name: "Triceps extension", sets: "4", reps: "12", focus: "triceps" }
+        ]
+      },
+      {
+        title: "Pull kracht",
+        exercises: [
+          { name: "Deadlift", sets: "4", reps: "4", focus: "rug/hamstrings" },
+          { name: "Weighted pull-up", sets: "4", reps: "6", focus: "rug" },
+          { name: "Barbell row", sets: "4", reps: "8", focus: "rug" },
+          { name: "Chest-supported row", sets: "3", reps: "10", focus: "rug" },
+          { name: "Rear delt fly", sets: "4", reps: "15", focus: "achterkant schouder" },
+          { name: "Hammer curl", sets: "4", reps: "10", focus: "biceps" }
+        ]
+      },
+      {
+        title: "Legs kracht",
+        exercises: [
+          { name: "Back squat", sets: "5", reps: "5", focus: "benen" },
+          { name: "Romanian deadlift", sets: "4", reps: "8", focus: "hamstrings" },
+          { name: "Hack squat", sets: "4", reps: "10", focus: "quads" },
+          { name: "Leg curl", sets: "4", reps: "12", focus: "hamstrings" },
+          { name: "Calf raise", sets: "5", reps: "12", focus: "kuiten" },
+          { name: "Ab wheel", sets: "3", reps: "10", focus: "core" }
+        ]
+      },
+      {
+        title: "Push hypertrofie",
+        exercises: [
+          { name: "Incline dumbbell press", sets: "4", reps: "10", focus: "borst" },
+          { name: "Machine chest press", sets: "3", reps: "12", focus: "borst" },
+          { name: "Cable fly", sets: "3", reps: "15", focus: "borst" },
+          { name: "Seated lateral raise", sets: "4", reps: "15", focus: "schouders" },
+          { name: "Overhead triceps cable", sets: "4", reps: "12", focus: "triceps" }
+        ]
+      },
+      {
+        title: "Pull hypertrofie",
+        exercises: [
+          { name: "Lat pulldown", sets: "4", reps: "10", focus: "rug" },
+          { name: "Cable row", sets: "4", reps: "12", focus: "rug" },
+          { name: "Single-arm dumbbell row", sets: "3", reps: "12 per kant", focus: "rug" },
+          { name: "Face pull", sets: "4", reps: "15", focus: "achterkant schouder" },
+          { name: "Preacher curl", sets: "4", reps: "12", focus: "biceps" }
+        ]
+      },
+      {
+        title: "Legs hypertrofie",
+        exercises: [
+          { name: "Front squat", sets: "4", reps: "8", focus: "quads" },
+          { name: "Leg press", sets: "4", reps: "12", focus: "benen" },
+          { name: "Walking lunge", sets: "3", reps: "12 per kant", focus: "benen" },
+          { name: "Seated leg curl", sets: "4", reps: "12", focus: "hamstrings" },
+          { name: "Standing calf raise", sets: "5", reps: "15", focus: "kuiten" }
+        ]
+      }
+    ]
+  }
+];
+
+const standardMeals = [
+  {
+    name: "Protein oats",
+    type: "Ontbijt",
+    calories: 520,
+    protein: 42,
+    carbs: 62,
+    fat: 12,
+    ingredients: [
+      { name: "Havermout", grams: 70 },
+      { name: "Whey protein", grams: 30 },
+      { name: "Halfvolle melk", grams: 180 },
+      { name: "Blauwe bessen", grams: 80 },
+      { name: "Pindakaas", grams: 10 }
+    ]
+  },
+  {
+    name: "Kip rijst bowl",
+    type: "Lunch",
+    calories: 680,
+    protein: 55,
+    carbs: 82,
+    fat: 14,
+    ingredients: [
+      { name: "Kipfilet", grams: 180 },
+      { name: "Rijst gekookt", grams: 250 },
+      { name: "Broccoli", grams: 150 },
+      { name: "Olijfolie", grams: 8 },
+      { name: "Sojasaus light", grams: 15 }
+    ]
+  },
+  {
+    name: "Tonijn wrap",
+    type: "Lunch",
+    calories: 430,
+    protein: 35,
+    carbs: 45,
+    fat: 11,
+    ingredients: [
+      { name: "Volkoren wrap", grams: 70 },
+      { name: "Tonijn op water", grams: 120 },
+      { name: "Griekse yoghurt 0%", grams: 50 },
+      { name: "Mais", grams: 40 },
+      { name: "Sla en komkommer", grams: 80 }
+    ]
+  },
+  {
+    name: "Zalm aardappel groente",
+    type: "Diner",
+    calories: 720,
+    protein: 48,
+    carbs: 64,
+    fat: 28,
+    ingredients: [
+      { name: "Zalmfilet", grams: 170 },
+      { name: "Aardappelen", grams: 300 },
+      { name: "Sperziebonen", grams: 180 },
+      { name: "Olijfolie", grams: 10 },
+      { name: "Citroen/kruiden", grams: 20 }
+    ]
+  },
+  {
+    name: "Lean beef pasta",
+    type: "Diner",
+    calories: 760,
+    protein: 52,
+    carbs: 88,
+    fat: 20,
+    ingredients: [
+      { name: "Mager rundergehakt", grams: 170 },
+      { name: "Volkoren pasta gekookt", grams: 260 },
+      { name: "Tomatensaus", grams: 160 },
+      { name: "Parmezaan", grams: 15 },
+      { name: "Spinazie", grams: 80 }
+    ]
+  },
+  {
+    name: "Skyr fruit whey",
+    type: "Snack",
+    calories: 310,
+    protein: 38,
+    carbs: 32,
+    fat: 3,
+    ingredients: [
+      { name: "Skyr naturel", grams: 250 },
+      { name: "Whey protein", grams: 20 },
+      { name: "Aardbeien", grams: 120 },
+      { name: "Honing", grams: 10 }
+    ]
+  },
+  {
+    name: "Eieren avocado toast",
+    type: "Ontbijt",
+    calories: 590,
+    protein: 31,
+    carbs: 44,
+    fat: 31,
+    ingredients: [
+      { name: "Volkoren brood", grams: 100 },
+      { name: "Eieren", grams: 150 },
+      { name: "Avocado", grams: 80 },
+      { name: "Huttenkase", grams: 80 },
+      { name: "Tomaat", grams: 70 }
+    ]
+  },
+  {
+    name: "Rijstwafels pindakaas whey",
+    type: "Snack",
+    calories: 420,
+    protein: 32,
+    carbs: 38,
+    fat: 16,
+    ingredients: [
+      { name: "Rijstwafels", grams: 40 },
+      { name: "Pindakaas", grams: 25 },
+      { name: "Whey protein", grams: 30 },
+      { name: "Banaan", grams: 90 }
+    ]
+  }
+];
+
+let calculatedMacros = null;
+
+const motivationQuotes = [
+  {
+    title: "Discipline boven motivatie.",
+    quote: "Je hoeft geen zin te hebben. Je hoeft alleen te beginnen.",
+    source: "Hard work mindset"
+  },
+  {
+    title: "Blijf harder dan je excuses.",
+    quote: "De sessie die je bijna overslaat, bouwt vaak het meeste karakter.",
+    source: "Endurance mindset"
+  },
+  {
+    title: "Comfort bouwt geen lichaam.",
+    quote: "Kies de set, de maaltijd en de herhaling die past bij je doel.",
+    source: "Performance mindset"
+  },
+  {
+    title: "Maak het simpel. Doe het strak.",
+    quote: "Log je voeding, train gecontroleerd, kom morgen sterker terug.",
+    source: "FitFuel mindset"
+  },
+  {
+    title: "Geen onderhandeling vandaag.",
+    quote: "Je plan staat vast. Je uitvoering bepaalt het verschil.",
+    source: "Discipline mindset"
+  },
+  {
+    title: "Verdien je progressie.",
+    quote: "Elke rep en elke keuze telt. Kleine discipline stapelt snel op.",
+    source: "Strength mindset"
+  },
+  {
+    title: "Werk als niemand kijkt.",
+    quote: "Resultaat komt van herhaling, niet van perfecte omstandigheden.",
+    source: "Training mindset"
+  }
+];
 
 const qs = (selector, scope = document) => scope.querySelector(selector);
 const qsa = (selector, scope = document) => [...scope.querySelectorAll(selector)];
@@ -61,6 +425,46 @@ function loadState() {
     return { ...structuredClone(defaultState), ...JSON.parse(saved) };
   } catch {
     return structuredClone(defaultState);
+  }
+}
+
+function loadUiSettings() {
+  const saved = localStorage.getItem(settingsKey);
+  if (!saved) return { layout: "app", theme: "dark" };
+
+  try {
+    const settings = JSON.parse(saved);
+    return {
+      layout: settings.layout === "web" ? "web" : "app",
+      theme: settings.theme === "light" ? "light" : "dark"
+    };
+  } catch {
+    return { layout: "app", theme: "dark" };
+  }
+}
+
+function saveUiSettings() {
+  localStorage.setItem(settingsKey, JSON.stringify(uiSettings));
+}
+
+function applyUiSettings() {
+  document.body.dataset.layout = uiSettings.layout;
+  document.body.dataset.theme = uiSettings.theme;
+  qs("meta[name='theme-color']").setAttribute("content", uiSettings.theme === "light" ? "#f7f7f7" : "#060606");
+
+  const layoutToggle = qs("#layoutToggle");
+  const themeToggle = qs("#themeToggle");
+
+  if (layoutToggle) {
+    const webMode = uiSettings.layout === "web";
+    layoutToggle.textContent = webMode ? "Appversie" : "Webversie";
+    layoutToggle.setAttribute("aria-pressed", String(webMode));
+  }
+
+  if (themeToggle) {
+    const lightMode = uiSettings.theme === "light";
+    themeToggle.textContent = lightMode ? "Dark mode" : "White mode";
+    themeToggle.setAttribute("aria-pressed", String(lightMode));
   }
 }
 
@@ -101,6 +505,18 @@ function sum(items, field) {
 function setMeter(id, value, goal) {
   const percent = goal > 0 ? Math.min(100, Math.round((value / goal) * 100)) : 0;
   qs(id).style.width = `${percent}%`;
+}
+
+function percent(value, goal) {
+  return goal > 0 ? Math.min(100, Math.round((value / goal) * 100)) : 0;
+}
+
+function renderMotivation() {
+  const index = new Date(todayKey).getDate() % motivationQuotes.length;
+  const item = motivationQuotes[index];
+  qs("#dashboard-title").textContent = item.title;
+  qs("#motivationQuote").textContent = item.quote;
+  qs("#motivationSource").textContent = item.source;
 }
 
 function renderLineChart(container, points, unit) {
@@ -218,22 +634,35 @@ function renderDashboard() {
   const previousWeight = state.weights.at(-2);
   const calorieGoal = number(state.profile.calorieGoal);
   const proteinGoal = number(state.profile.proteinGoal);
+  const caloriePercent = percent(calories, calorieGoal);
+  const proteinPercent = percent(protein, proteinGoal);
+  const volumeGoal = 12000;
 
   qs("#caloriesOut").value = calories;
   qs("#caloriesLeftOut").textContent = Math.max(0, calorieGoal - calories);
+  qs("#calorieGoalOut").textContent = calorieGoal;
+  qs("#caloriePercentOut").textContent = `${caloriePercent}%`;
   qs("#proteinOut").value = protein;
+  qs("#proteinLeftOut").textContent = Math.max(0, proteinGoal - protein);
   qs("#proteinGoalOut").textContent = proteinGoal;
+  qs("#proteinPercentOut").textContent = `${proteinPercent}%`;
   qs("#volumeOut").value = Math.round(volume);
+  qs("#workoutCountOut").textContent = `${workouts.length} ${workouts.length === 1 ? "log" : "logs"}`;
+  qs("#volumeStatusOut").textContent = workouts.length
+    ? `${Math.round(percent(volume, volumeGoal))}% van dagvolume`
+    : "Nog geen training gelogd";
   qs("#weightOut").value = latestWeight ? `${latestWeight.weight}kg` : "-";
+  qs("#weightDateOut").textContent = latestWeight ? formatDate(latestWeight.date) : "Geen log";
   qs("#weightTrendOut").textContent = latestWeight && previousWeight
     ? `${(latestWeight.weight - previousWeight.weight).toFixed(1)}kg sinds vorige meting`
     : "Nog geen trend";
 
   setMeter("#calorieMeter", calories, calorieGoal);
   setMeter("#proteinMeter", protein, proteinGoal);
-  setMeter("#volumeMeter", volume, 12000);
+  setMeter("#volumeMeter", volume, volumeGoal);
   setMeter("#weightMeter", latestWeight ? 70 : 0, 100);
 
+  renderMotivation();
   renderMacroChart(qs("#macroChart"), meals);
   renderTrendCharts();
   renderList(qs("#todayMeals"), meals, "Nog geen maaltijden voor vandaag.", mealTemplate);
@@ -317,11 +746,224 @@ function renderProfile() {
   });
 }
 
+function renderTrainingRecommendations() {
+  const goal = qs("#trainingGoal")?.value || "strength";
+  const location = qs("#trainingLocation")?.value.trim();
+  const matches = trainingOptions.filter((option) => option.match.includes(goal));
+  const fallback = trainingOptions.filter((option) => !option.match.includes(goal)).slice(0, 1);
+  const options = [...matches, ...fallback].slice(0, 3);
+  const container = qs("#trainingRecommendations");
+
+  container.innerHTML = options.map((option) => {
+    const query = encodeURIComponent(`${option.search} ${location || "in de buurt"}`);
+    return `
+      <article class="recommendation-card">
+        <div>
+          <span class="plan-tag">${escapeHtml(option.tag)}</span>
+          <h3>${escapeHtml(option.title)}</h3>
+          <p>${escapeHtml(option.details)}</p>
+        </div>
+        <a class="ghost-button small" href="https://www.google.com/maps/search/${query}" target="_blank" rel="noreferrer">Maps</a>
+      </article>
+    `;
+  }).join("");
+}
+
+function renderGymPrograms() {
+  const tabs = qs("#programTabs");
+  const details = qs("#programDetails");
+  if (!tabs || !details) return;
+
+  tabs.innerHTML = gymPrograms.map((program) => `
+    <button class="program-tab-button" type="button" data-program="${program.id}" aria-pressed="${program.id === selectedProgramId}">
+      <strong>${escapeHtml(program.title)}</strong>
+      <span>${escapeHtml(program.frequency)}</span>
+    </button>
+  `).join("");
+
+  const program = gymPrograms.find((item) => item.id === selectedProgramId) || gymPrograms[0];
+  details.innerHTML = `
+    <article class="program-card">
+      <div class="program-summary">
+        <div>
+          <span class="plan-tag">${escapeHtml(program.frequency)}</span>
+          <h3>${escapeHtml(program.title)} schema</h3>
+          <p>${escapeHtml(program.goal)}</p>
+        </div>
+        <small>${escapeHtml(program.note)}</small>
+      </div>
+      <div class="program-day-grid">
+        ${program.days.map((day) => `
+          <section class="program-day">
+            <h4>${escapeHtml(day.title)}</h4>
+            <div class="exercise-list">
+              ${day.exercises.map((exercise) => `
+                <div class="exercise-row">
+                  <div>
+                    <strong>${escapeHtml(exercise.name)}</strong>
+                    <span>${escapeHtml(exercise.focus)}</span>
+                  </div>
+                  <small>${escapeHtml(exercise.sets)} x ${escapeHtml(exercise.reps)}</small>
+                </div>
+              `).join("")}
+            </div>
+          </section>
+        `).join("")}
+      </div>
+    </article>
+  `;
+}
+
+function mealCardTemplate(meal, index, showAddButton = true) {
+  return `
+    <article class="meal-card" tabindex="0" role="button" data-show-meal="${index}" aria-label="Bekijk ingredienten voor ${escapeHtml(meal.name)}">
+      <div>
+        <span class="plan-tag">${escapeHtml(meal.type)}</span>
+        <h3>${escapeHtml(meal.name)}</h3>
+        <p>${meal.calories} kcal · ${meal.protein}g eiwit · ${meal.carbs}g carbs · ${meal.fat}g vet</p>
+        <small class="ingredient-hint">Klik voor grammen per ingredient</small>
+      </div>
+      ${showAddButton ? `<button class="ghost-button small" type="button" data-add-meal="${index}">Log</button>` : ""}
+    </article>
+  `;
+}
+
+function renderMealLibrary() {
+  qs("#mealLibrary").innerHTML = standardMeals.map((meal, index) => mealCardTemplate(meal, index)).join("");
+}
+
+function renderMealDetails(index) {
+  const meal = standardMeals[index];
+  if (!meal) return;
+
+  qs("#mealDetails").innerHTML = `
+    <div class="meal-detail-card">
+      <div class="meal-detail-head">
+        <div>
+          <span class="plan-tag">${escapeHtml(meal.type)}</span>
+          <h3>${escapeHtml(meal.name)}</h3>
+          <p>${meal.calories} kcal · ${meal.protein}g eiwit · ${meal.carbs}g carbs · ${meal.fat}g vet</p>
+        </div>
+        <button class="primary-button" type="button" data-add-meal="${index}">Log maaltijd</button>
+      </div>
+      <div class="ingredient-list">
+        ${meal.ingredients.map((ingredient) => `
+          <div class="ingredient-row">
+            <span>${escapeHtml(ingredient.name)}</span>
+            <strong>${ingredient.grams}g</strong>
+          </div>
+        `).join("")}
+      </div>
+    </div>
+  `;
+}
+
+function calculateMacros(data) {
+  const weight = number(data.weight);
+  const height = number(data.height);
+  const age = number(data.age);
+  const activity = number(data.activity);
+  const bmr = data.sex === "female"
+    ? 10 * weight + 6.25 * height - 5 * age - 161
+    : 10 * weight + 6.25 * height - 5 * age + 5;
+  const maintenance = Math.round(bmr * activity);
+  const calories = data.goal === "cut"
+    ? maintenance - 350
+    : data.goal === "bulk"
+      ? maintenance + 250
+      : maintenance;
+  const protein = Math.round(weight * (data.goal === "cut" ? 2.2 : 2));
+  const fat = Math.round(weight * 0.8);
+  const carbs = Math.max(80, Math.round((calories - protein * 4 - fat * 9) / 4));
+
+  return { calories, protein, carbs, fat, maintenance };
+}
+
+function renderMacroResult(result) {
+  qs("#macroCalculatorResult").innerHTML = `
+    <div class="macro-result-grid">
+      <article><span>Calorieen</span><strong>${result.calories}</strong><small>Onderhoud: ${result.maintenance}</small></article>
+      <article><span>Eiwit</span><strong>${result.protein}g</strong><small>Dagdoel</small></article>
+      <article><span>Koolhydraten</span><strong>${result.carbs}g</strong><small>Dagdoel</small></article>
+      <article><span>Vet</span><strong>${result.fat}g</strong><small>Dagdoel</small></article>
+    </div>
+  `;
+}
+
+function addStandardMeal(index) {
+  const meal = standardMeals[index];
+  if (!meal) return;
+
+  state.meals.push({
+    id: crypto.randomUUID(),
+    date: todayKey,
+    type: meal.type,
+    name: meal.name,
+    calories: meal.calories,
+    protein: meal.protein,
+    carbs: meal.carbs,
+    fat: meal.fat,
+    barcode: ""
+  });
+  saveState();
+  renderAll();
+}
+
+function generateMealPlan() {
+  const target = calculatedMacros || {
+    calories: number(state.profile.calorieGoal),
+    protein: number(state.profile.proteinGoal),
+    carbs: number(state.profile.carbsGoal),
+    fat: number(state.profile.fatGoal)
+  };
+  const selected = [];
+  let totals = { calories: 0, protein: 0, carbs: 0, fat: 0 };
+  const sortedMeals = [...standardMeals].sort((a, b) => b.protein - a.protein);
+
+  for (const meal of sortedMeals) {
+    if (selected.length >= 5) break;
+    const fitsCalories = totals.calories + meal.calories <= target.calories + 180;
+    const needsProtein = totals.protein < target.protein;
+    const needsCalories = totals.calories < target.calories * 0.92;
+
+    if (fitsCalories && (needsProtein || needsCalories)) {
+      selected.push(meal);
+      totals = {
+        calories: totals.calories + meal.calories,
+        protein: totals.protein + meal.protein,
+        carbs: totals.carbs + meal.carbs,
+        fat: totals.fat + meal.fat
+      };
+    }
+  }
+
+  qs("#mealPlan").innerHTML = `
+    <div class="plan-summary">
+      <span>${totals.calories}/${target.calories} kcal</span>
+      <span>${totals.protein}/${target.protein}g eiwit</span>
+      <span>${totals.carbs}/${target.carbs}g carbs</span>
+      <span>${totals.fat}/${target.fat}g vet</span>
+    </div>
+    <div class="meal-library">
+      ${selected.map((meal) => mealCardTemplate(meal, standardMeals.indexOf(meal))).join("")}
+    </div>
+  `;
+}
+
+function renderPlan() {
+  renderTrainingRecommendations();
+  renderGymPrograms();
+  renderMealLibrary();
+  if (!qs("#mealDetails").innerHTML.trim()) renderMealDetails(0);
+  if (!qs("#mealPlan").innerHTML.trim()) generateMealPlan();
+}
+
 function renderAll() {
   renderDashboard();
   renderFood();
   renderGym();
   renderProgress();
+  renderPlan();
   renderProfile();
 }
 
@@ -687,6 +1329,78 @@ function bindEvents() {
   qs("#profileForm").addEventListener("submit", handleProfileSubmit);
   qs("#clearMeals").addEventListener("click", () => clearCollection("meals"));
   qs("#clearWorkouts").addEventListener("click", () => clearCollection("workouts"));
+  qs("#layoutToggle").addEventListener("click", () => {
+    uiSettings.layout = uiSettings.layout === "web" ? "app" : "web";
+    saveUiSettings();
+    applyUiSettings();
+  });
+  qs("#themeToggle").addEventListener("click", () => {
+    uiSettings.theme = uiSettings.theme === "light" ? "dark" : "light";
+    saveUiSettings();
+    applyUiSettings();
+  });
+  qs("#findTrainingButton").addEventListener("click", renderTrainingRecommendations);
+  qs("#trainingGoal").addEventListener("change", renderTrainingRecommendations);
+  qs("#programTabs").addEventListener("click", (event) => {
+    const button = event.target.closest("[data-program]");
+    if (!button) return;
+    selectedProgramId = button.dataset.program;
+    renderGymPrograms();
+  });
+  qs("#macroCalculatorForm").addEventListener("submit", (event) => {
+    event.preventDefault();
+    const data = Object.fromEntries(new FormData(event.currentTarget));
+    calculatedMacros = calculateMacros(data);
+    state.profile.calorieGoal = calculatedMacros.calories;
+    state.profile.proteinGoal = calculatedMacros.protein;
+    state.profile.carbsGoal = calculatedMacros.carbs;
+    state.profile.fatGoal = calculatedMacros.fat;
+    saveState();
+    renderMacroResult(calculatedMacros);
+    generateMealPlan();
+    renderDashboard();
+    renderProfile();
+  });
+  qs("#generateMealPlan").addEventListener("click", generateMealPlan);
+  qs("#mealLibrary").addEventListener("click", (event) => {
+    const button = event.target.closest("[data-add-meal]");
+    if (button) {
+      addStandardMeal(number(button.dataset.addMeal));
+      return;
+    }
+
+    const card = event.target.closest("[data-show-meal]");
+    if (card) renderMealDetails(number(card.dataset.showMeal));
+  });
+  qs("#mealLibrary").addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    const card = event.target.closest("[data-show-meal]");
+    if (!card) return;
+    event.preventDefault();
+    renderMealDetails(number(card.dataset.showMeal));
+  });
+  qs("#mealPlan").addEventListener("click", (event) => {
+    const button = event.target.closest("[data-add-meal]");
+    if (button) {
+      addStandardMeal(number(button.dataset.addMeal));
+      return;
+    }
+
+    const card = event.target.closest("[data-show-meal]");
+    if (card) renderMealDetails(number(card.dataset.showMeal));
+  });
+  qs("#mealPlan").addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    const card = event.target.closest("[data-show-meal]");
+    if (!card) return;
+    event.preventDefault();
+    renderMealDetails(number(card.dataset.showMeal));
+  });
+  qs("#mealDetails").addEventListener("click", (event) => {
+    const button = event.target.closest("[data-add-meal]");
+    if (!button) return;
+    addStandardMeal(number(button.dataset.addMeal));
+  });
   qs("#startScanner").addEventListener("click", startScanner);
   qs("#stopScanner").addEventListener("click", stopScanner);
   qs("#lookupBarcode").addEventListener("click", () => lookupProductByBarcode(qs("#barcodeInput").value));
@@ -726,4 +1440,5 @@ qs("#todayLabel").textContent = new Intl.DateTimeFormat("nl-NL", {
 }).format(new Date());
 
 bindEvents();
+applyUiSettings();
 renderAll();

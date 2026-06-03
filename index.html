@@ -11,7 +11,7 @@
     <link rel="apple-touch-icon" href="icons/icon.svg">
     <link rel="stylesheet" href="styles.css">
   </head>
-  <body>
+  <body data-layout="app" data-theme="dark">
     <div class="app-shell">
       <aside class="sidebar" aria-label="Hoofdnavigatie">
         <div class="brand">
@@ -47,6 +47,10 @@
           <span class="icon" aria-hidden="true">⌁</span>
           Progressie
         </button>
+        <button class="nav-tab" type="button" data-view="plan" aria-pressed="false">
+          <span class="icon" aria-hidden="true">◇</span>
+          Plan
+        </button>
         <button class="nav-tab" type="button" data-view="profile" aria-pressed="false">
           <span class="icon" aria-hidden="true">□</span>
           Profiel
@@ -59,15 +63,23 @@
             <p class="eyebrow">Vandaag</p>
             <h1 id="pageTitle">Dashboard</h1>
           </div>
-          <div class="date-pill" id="todayLabel"></div>
+          <div class="top-actions" aria-label="Weergave instellingen">
+            <button class="mode-button" id="layoutToggle" type="button" aria-pressed="false">Webversie</button>
+            <button class="mode-button" id="themeToggle" type="button" aria-pressed="false">White mode</button>
+            <div class="date-pill" id="todayLabel"></div>
+          </div>
         </header>
 
         <section class="view active" id="dashboard" aria-labelledby="dashboard-title">
           <div class="hero-band">
             <div>
-              <p class="eyebrow">Dagstatus</p>
-              <h2 id="dashboard-title">Je training en voeding in een overzicht</h2>
-              <p class="hero-copy">Log je maaltijden, sets en lichaamsgewicht. De app rekent je calorieen, macro's en trainingsvolume direct bij.</p>
+              <p class="eyebrow">Motivatie start</p>
+              <h2 id="dashboard-title">Discipline boven motivatie.</h2>
+              <p class="hero-copy" id="motivationQuote">Doe vandaag wat je toekomstige zelf nodig heeft.</p>
+              <div class="hero-meta">
+                <span id="motivationSource">FitFuel mindset</span>
+                <span id="motivationFocus">Vandaag: voeding, training, progressie.</span>
+              </div>
             </div>
             <div class="plate-visual" aria-hidden="true">
               <div class="plate">
@@ -83,26 +95,38 @@
 
           <div class="stats-grid">
             <article class="stat-card">
-              <span>Calorieen</span>
-              <strong><output id="caloriesOut">0</output></strong>
-              <small><span id="caloriesLeftOut">0</span> over van doel</small>
+              <div class="stat-head">
+                <span>Calorieen</span>
+                <small id="caloriePercentOut">0%</small>
+              </div>
+              <strong><output id="caloriesOut">0</output><span> kcal</span></strong>
+              <small><span id="caloriesLeftOut">0</span> over · doel <span id="calorieGoalOut">0</span></small>
               <div class="meter"><span id="calorieMeter"></span></div>
             </article>
             <article class="stat-card">
-              <span>Eiwitten</span>
-              <strong><output id="proteinOut">0</output>g</strong>
-              <small>Doel: <span id="proteinGoalOut">160</span>g</small>
+              <div class="stat-head">
+                <span>Eiwitten</span>
+                <small id="proteinPercentOut">0%</small>
+              </div>
+              <strong><output id="proteinOut">0</output><span> g</span></strong>
+              <small><span id="proteinLeftOut">0</span>g over · doel <span id="proteinGoalOut">160</span>g</small>
               <div class="meter"><span id="proteinMeter"></span></div>
             </article>
             <article class="stat-card">
-              <span>Trainingsvolume</span>
-              <strong><output id="volumeOut">0</output>kg</strong>
-              <small>Vandaag gelogd</small>
+              <div class="stat-head">
+                <span>Volume</span>
+                <small id="workoutCountOut">0 logs</small>
+              </div>
+              <strong><output id="volumeOut">0</output><span> kg</span></strong>
+              <small id="volumeStatusOut">Nog geen training gelogd</small>
               <div class="meter accent"><span id="volumeMeter"></span></div>
             </article>
             <article class="stat-card">
-              <span>Laatste gewicht</span>
-              <strong><output id="weightOut">-</output></strong>
+              <div class="stat-head">
+                <span>Gewicht</span>
+                <small id="weightDateOut">Vandaag</small>
+              </div>
+              <strong><output id="weightOut">-</output><span></span></strong>
               <small><span id="weightTrendOut">Nog geen trend</span></small>
               <div class="meter green"><span id="weightMeter"></span></div>
             </article>
@@ -291,6 +315,115 @@
               <div class="list" id="recordList"></div>
             </section>
           </div>
+        </section>
+
+        <section class="view" id="plan" aria-labelledby="plan-title">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Plan</p>
+              <h2 id="plan-title">Gym, macro's en eetschema</h2>
+            </div>
+          </div>
+
+          <section class="panel finder-panel">
+            <div class="panel-head">
+              <div>
+                <h2>Vind je trainingstype</h2>
+                <p class="panel-copy">Kies wat je zoekt en vergelijk opties zoals gym, pilates of Hyrox.</p>
+              </div>
+            </div>
+            <div class="finder-controls">
+              <label>Doel
+                <select id="trainingGoal">
+                  <option value="strength">Spiermassa / kracht</option>
+                  <option value="pilates">Pilates / core</option>
+                  <option value="hyrox">Hyrox / conditie</option>
+                  <option value="fatloss">Afvallen / fit worden</option>
+                </select>
+              </label>
+              <label>Locatie
+                <input id="trainingLocation" placeholder="Bijv. Amsterdam, Rotterdam">
+              </label>
+              <button class="primary-button" id="findTrainingButton" type="button">Zoek advies</button>
+            </div>
+            <div class="recommendation-grid" id="trainingRecommendations"></div>
+          </section>
+
+          <section class="panel program-panel">
+            <div class="panel-head">
+              <div>
+                <h2>Gymschema's</h2>
+                <p class="panel-copy">Kies je niveau en gebruik voorbeeld-oefeningen als basis voor je week.</p>
+              </div>
+            </div>
+            <div class="program-tabs" id="programTabs" aria-label="Kies gymschema"></div>
+            <div class="program-details" id="programDetails"></div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-head">
+              <div>
+                <h2>Macro calculator</h2>
+                <p class="panel-copy">Bereken je dagdoel en maak daarna een eetschema.</p>
+              </div>
+            </div>
+            <form class="form-grid calculator-grid" id="macroCalculatorForm">
+              <label>Geslacht
+                <select name="sex">
+                  <option value="male">Man</option>
+                  <option value="female">Vrouw</option>
+                </select>
+              </label>
+              <label>Leeftijd
+                <input name="age" type="number" min="13" max="90" value="25">
+              </label>
+              <label>Lengte cm
+                <input name="height" type="number" min="120" max="230" value="180">
+              </label>
+              <label>Gewicht kg
+                <input name="weight" type="number" min="35" max="250" step="0.1" value="82">
+              </label>
+              <label>Activiteit
+                <select name="activity">
+                  <option value="1.2">Laag</option>
+                  <option value="1.375">Licht actief</option>
+                  <option value="1.55" selected>Gemiddeld actief</option>
+                  <option value="1.725">Zeer actief</option>
+                </select>
+              </label>
+              <label>Doel
+                <select name="goal">
+                  <option value="cut">Afvallen</option>
+                  <option value="maintain">Onderhoud</option>
+                  <option value="bulk" selected>Spiermassa</option>
+                </select>
+              </label>
+              <button class="primary-button" type="submit">Bereken macro's</button>
+            </form>
+            <div class="macro-result" id="macroCalculatorResult"></div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-head">
+              <div>
+                <h2>Standaard gerechten</h2>
+                <p class="panel-copy">Gebruik vaste maaltijden om snel je macro's te halen.</p>
+              </div>
+              <button class="ghost-button small" id="generateMealPlan" type="button">Maak schema</button>
+            </div>
+            <div class="meal-library" id="mealLibrary"></div>
+            <div class="meal-details" id="mealDetails"></div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-head">
+              <div>
+                <h2>Eetschema</h2>
+                <p class="panel-copy">Schema wordt gemaakt op basis van je macrodoel en standaardgerechten.</p>
+              </div>
+            </div>
+            <div class="meal-plan" id="mealPlan"></div>
+          </section>
         </section>
 
         <section class="view" id="profile" aria-labelledby="profile-title">
