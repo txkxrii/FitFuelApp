@@ -21,9 +21,6 @@ const defaultState = {
   ],
   weights: [
     { id: crypto.randomUUID(), date: todayKey, weight: 82, note: "Startmeting" }
-  ],
-  feedback: [
-    { id: crypto.randomUUID(), date: todayKey, tester: "Test gebruiker", area: "Algemeen", rating: 5, message: "De app is duidelijk. Ik wil vooral testen of logs snel genoeg werken." }
   ]
 };
 
@@ -44,8 +41,150 @@ const views = {
   gym: "Gymtracker",
   progress: "Progressie",
   plan: "Plan",
+  mealPlanner: "Eetplanner",
+  feedback: "Feedback",
   profile: "Profiel"
 };
+
+const exactPlannerMeals = [
+  {
+    title: "Ontbijt",
+    split: 0.25,
+    foods: [
+      { name: "Whey protein", unit: "droog", protein: 0.8, carbs: 0.07, fat: 0.06 },
+      { name: "Havermout", unit: "droog", protein: 0.13, carbs: 0.6, fat: 0.07 },
+      { name: "Pindakaas", unit: "gram", protein: 0.25, carbs: 0.2, fat: 0.5 }
+    ],
+    extra: { name: "Blauwe bessen", grams: 80 }
+  },
+  {
+    title: "Lunch",
+    split: 0.28,
+    foods: [
+      { name: "Kipfilet", unit: "bereid", protein: 0.31, carbs: 0, fat: 0.036 },
+      { name: "Rijst", unit: "gekookt", protein: 0.027, carbs: 0.28, fat: 0.003 },
+      { name: "Olijfolie", unit: "gram", protein: 0, carbs: 0, fat: 1 }
+    ],
+    extra: { name: "Broccoli", grams: 150 }
+  },
+  {
+    title: "Diner",
+    split: 0.32,
+    foods: [
+      { name: "Kalkoenfilet", unit: "bereid", protein: 0.29, carbs: 0, fat: 0.02 },
+      { name: "Aardappelen", unit: "gekookt", protein: 0.02, carbs: 0.17, fat: 0.001 },
+      { name: "Olijfolie", unit: "gram", protein: 0, carbs: 0, fat: 1 }
+    ],
+    extra: { name: "Groente naar keuze", grams: 200 }
+  },
+  {
+    title: "Snack",
+    split: 0.15,
+    foods: [
+      { name: "Skyr naturel", unit: "gram", protein: 0.11, carbs: 0.04, fat: 0.002 },
+      { name: "Banaan", unit: "gram", protein: 0.011, carbs: 0.23, fat: 0.003 },
+      { name: "Amandelen", unit: "gram", protein: 0.21, carbs: 0.22, fat: 0.5 }
+    ],
+    extra: null
+  },
+  {
+    title: "Extra maaltijd",
+    split: 0.12,
+    foods: [
+      { name: "Tonijn op water", unit: "uitgelekt", protein: 0.26, carbs: 0, fat: 0.01 },
+      { name: "Volkoren wrap", unit: "gram", protein: 0.09, carbs: 0.5, fat: 0.08 },
+      { name: "Avocado", unit: "gram", protein: 0.02, carbs: 0.09, fat: 0.15 }
+    ],
+    extra: { name: "Sla en komkommer", grams: 100 }
+  }
+];
+
+const storeFoods = [
+  {
+    name: "Skyr of magere kwark",
+    type: "Eiwit",
+    macros: "250g · 25-30g eiwit",
+    use: "Snel ontbijt of snack. Combineer met fruit of havermout.",
+    tip: "Kies naturel als je suiker laag wilt houden."
+  },
+  {
+    name: "Proteine pudding",
+    type: "Eiwit",
+    macros: "200g · 20g eiwit",
+    use: "Handig als zoete snack na training of onderweg.",
+    tip: "Check calorieen per bakje; smaken verschillen sterk."
+  },
+  {
+    name: "Tonijn op water",
+    type: "Eiwit",
+    macros: "1 blik · 25-30g eiwit",
+    use: "Goed in wraps, salade of op rijstwafels.",
+    tip: "Neem zakjes of blikjes als noodvoorraad."
+  },
+  {
+    name: "Gerookte kipfilet",
+    type: "Eiwit",
+    macros: "100g · 22-25g eiwit",
+    use: "Direct klaar voor wraps, rijstbowls of salade.",
+    tip: "Let op zout als je dit vaak gebruikt."
+  },
+  {
+    name: "Maaltijdsalade met kip",
+    type: "Complete maaltijd",
+    macros: "1 bak · 400-700 kcal",
+    use: "Makkelijke lunch als je weinig tijd hebt.",
+    tip: "Gebruik minder dressing als vetten hoog uitvallen."
+  },
+  {
+    name: "Magnetronrijst",
+    type: "Koolhydraten",
+    macros: "250g · 70-80g carbs",
+    use: "Snelle basis voor kip, tonijn of roerbakgroente.",
+    tip: "Kies naturel rijst voor betere controle over macro's."
+  },
+  {
+    name: "Volkoren wraps",
+    type: "Koolhydraten",
+    macros: "1 wrap · 35-45g carbs",
+    use: "Makkelijk met kip, tonijn, hummus of groente.",
+    tip: "Handig voor mealprep zonder koken."
+  },
+  {
+    name: "Voorgekookte aardappelen",
+    type: "Koolhydraten",
+    macros: "300g · 50g carbs",
+    use: "Snel opbakken of in de airfryer.",
+    tip: "Combineer met magere eiwitbron en groente."
+  },
+  {
+    name: "Avocado cup of guacamole",
+    type: "Vetten",
+    macros: "70g · 10-15g vet",
+    use: "Voor gezonde vetten bij wraps of bowls.",
+    tip: "Weeg dit, vetten lopen snel op."
+  },
+  {
+    name: "Ongezouten notenmix",
+    type: "Vetten",
+    macros: "30g · 15-18g vet",
+    use: "Compacte calorieen als je bulk of veel energie nodig hebt.",
+    tip: "Gebruik kleine porties; 30g is vaak genoeg."
+  },
+  {
+    name: "Kant-en-klare omelet of gekookte eieren",
+    type: "Eiwit en vet",
+    macros: "2 eieren · 12g eiwit · 10g vet",
+    use: "Snelle snack of ontbijt zonder koken.",
+    tip: "Combineer met brood of fruit als je carbs mist."
+  },
+  {
+    name: "Sushi of poke bowl",
+    type: "Complete maaltijd",
+    macros: "1 portie · 500-800 kcal",
+    use: "Goede snelle maaltijd met rijst en vis/kip.",
+    tip: "Kies extra eiwit als je eiwitdoel hoog is."
+  }
+];
 
 const trainingOptions = [
   {
@@ -246,129 +385,6 @@ const gymPrograms = [
   }
 ];
 
-const standardMeals = [
-  {
-    name: "Protein oats",
-    type: "Ontbijt",
-    calories: 520,
-    protein: 42,
-    carbs: 62,
-    fat: 12,
-    ingredients: [
-      { name: "Havermout", grams: 70 },
-      { name: "Whey protein", grams: 30 },
-      { name: "Halfvolle melk", grams: 180 },
-      { name: "Blauwe bessen", grams: 80 },
-      { name: "Pindakaas", grams: 10 }
-    ]
-  },
-  {
-    name: "Kip rijst bowl",
-    type: "Lunch",
-    calories: 680,
-    protein: 55,
-    carbs: 82,
-    fat: 14,
-    ingredients: [
-      { name: "Kipfilet", grams: 180 },
-      { name: "Rijst gekookt", grams: 250 },
-      { name: "Broccoli", grams: 150 },
-      { name: "Olijfolie", grams: 8 },
-      { name: "Sojasaus light", grams: 15 }
-    ]
-  },
-  {
-    name: "Tonijn wrap",
-    type: "Lunch",
-    calories: 430,
-    protein: 35,
-    carbs: 45,
-    fat: 11,
-    ingredients: [
-      { name: "Volkoren wrap", grams: 70 },
-      { name: "Tonijn op water", grams: 120 },
-      { name: "Griekse yoghurt 0%", grams: 50 },
-      { name: "Mais", grams: 40 },
-      { name: "Sla en komkommer", grams: 80 }
-    ]
-  },
-  {
-    name: "Zalm aardappel groente",
-    type: "Diner",
-    calories: 720,
-    protein: 48,
-    carbs: 64,
-    fat: 28,
-    ingredients: [
-      { name: "Zalmfilet", grams: 170 },
-      { name: "Aardappelen", grams: 300 },
-      { name: "Sperziebonen", grams: 180 },
-      { name: "Olijfolie", grams: 10 },
-      { name: "Citroen/kruiden", grams: 20 }
-    ]
-  },
-  {
-    name: "Lean beef pasta",
-    type: "Diner",
-    calories: 760,
-    protein: 52,
-    carbs: 88,
-    fat: 20,
-    ingredients: [
-      { name: "Mager rundergehakt", grams: 170 },
-      { name: "Volkoren pasta gekookt", grams: 260 },
-      { name: "Tomatensaus", grams: 160 },
-      { name: "Parmezaan", grams: 15 },
-      { name: "Spinazie", grams: 80 }
-    ]
-  },
-  {
-    name: "Skyr fruit whey",
-    type: "Snack",
-    calories: 310,
-    protein: 38,
-    carbs: 32,
-    fat: 3,
-    ingredients: [
-      { name: "Skyr naturel", grams: 250 },
-      { name: "Whey protein", grams: 20 },
-      { name: "Aardbeien", grams: 120 },
-      { name: "Honing", grams: 10 }
-    ]
-  },
-  {
-    name: "Eieren avocado toast",
-    type: "Ontbijt",
-    calories: 590,
-    protein: 31,
-    carbs: 44,
-    fat: 31,
-    ingredients: [
-      { name: "Volkoren brood", grams: 100 },
-      { name: "Eieren", grams: 150 },
-      { name: "Avocado", grams: 80 },
-      { name: "Huttenkase", grams: 80 },
-      { name: "Tomaat", grams: 70 }
-    ]
-  },
-  {
-    name: "Rijstwafels pindakaas whey",
-    type: "Snack",
-    calories: 420,
-    protein: 32,
-    carbs: 38,
-    fat: 16,
-    ingredients: [
-      { name: "Rijstwafels", grams: 40 },
-      { name: "Pindakaas", grams: 25 },
-      { name: "Whey protein", grams: 30 },
-      { name: "Banaan", grams: 90 }
-    ]
-  }
-];
-
-let calculatedMacros = null;
-
 const motivationQuotes = [
   {
     title: "Discipline boven motivatie.",
@@ -433,16 +449,15 @@ function loadState() {
 
 function loadUiSettings() {
   const saved = localStorage.getItem(settingsKey);
-  if (!saved) return { layout: "app", theme: "dark" };
+  if (!saved) return { layout: "app" };
 
   try {
     const settings = JSON.parse(saved);
     return {
-      layout: settings.layout === "web" ? "web" : "app",
-      theme: settings.theme === "light" ? "light" : "dark"
+      layout: settings.layout === "web" ? "web" : "app"
     };
   } catch {
-    return { layout: "app", theme: "dark" };
+    return { layout: "app" };
   }
 }
 
@@ -452,22 +467,14 @@ function saveUiSettings() {
 
 function applyUiSettings() {
   document.body.dataset.layout = uiSettings.layout;
-  document.body.dataset.theme = uiSettings.theme;
-  qs("meta[name='theme-color']").setAttribute("content", uiSettings.theme === "light" ? "#f7f6f2" : "#f3f1ec");
+  qs("meta[name='theme-color']").setAttribute("content", "#f3f1ec");
 
   const layoutToggle = qs("#layoutToggle");
-  const themeToggle = qs("#themeToggle");
 
   if (layoutToggle) {
     const webMode = uiSettings.layout === "web";
     layoutToggle.textContent = webMode ? "Appversie" : "Webversie";
     layoutToggle.setAttribute("aria-pressed", String(webMode));
-  }
-
-  if (themeToggle) {
-    const lightMode = uiSettings.theme === "light";
-    themeToggle.textContent = lightMode ? "Dark mode" : "White mode";
-    themeToggle.setAttribute("aria-pressed", String(lightMode));
   }
 }
 
@@ -747,22 +754,6 @@ function renderProfile() {
   Object.entries(state.profile).forEach(([key, value]) => {
     if (form.elements[key]) form.elements[key].value = value;
   });
-  renderFeedback();
-}
-
-function feedbackTemplate(item) {
-  return `
-    <div>
-      <strong>${escapeHtml(item.area)} · ${escapeHtml(item.tester)}</strong>
-      <div class="list-meta">${formatDate(item.date)} · score ${item.rating}/5</div>
-      <p class="feedback-message">${escapeHtml(item.message)}</p>
-    </div>
-  `;
-}
-
-function renderFeedback() {
-  const feedback = [...(state.feedback || [])].reverse();
-  renderList(qs("#feedbackList"), feedback, "Nog geen feedback opgeslagen.", feedbackTemplate);
 }
 
 function renderTrainingRecommendations() {
@@ -833,148 +824,203 @@ function renderGymPrograms() {
   `;
 }
 
-function mealCardTemplate(meal, index, showAddButton = true) {
-  return `
-    <article class="meal-card" tabindex="0" role="button" data-show-meal="${index}" aria-label="Bekijk ingredienten voor ${escapeHtml(meal.name)}">
-      <div>
-        <span class="plan-tag">${escapeHtml(meal.type)}</span>
-        <h3>${escapeHtml(meal.name)}</h3>
-        <p>${meal.calories} kcal · ${meal.protein}g eiwit · ${meal.carbs}g carbs · ${meal.fat}g vet</p>
-        <small class="ingredient-hint">Klik voor grammen per ingredient</small>
-      </div>
-      ${showAddButton ? `<button class="ghost-button small" type="button" data-add-meal="${index}">Log</button>` : ""}
-    </article>
+function solveThreeFoods(target, foods) {
+  const [a, b, c] = foods;
+  const matrix = [
+    [a.protein, b.protein, c.protein],
+    [a.carbs, b.carbs, c.carbs],
+    [a.fat, b.fat, c.fat]
+  ];
+  const det =
+    matrix[0][0] * (matrix[1][1] * matrix[2][2] - matrix[1][2] * matrix[2][1]) -
+    matrix[0][1] * (matrix[1][0] * matrix[2][2] - matrix[1][2] * matrix[2][0]) +
+    matrix[0][2] * (matrix[1][0] * matrix[2][1] - matrix[1][1] * matrix[2][0]);
+
+  if (Math.abs(det) < 0.0001) return null;
+
+  const detFor = (column, values) => {
+    const m = matrix.map((row) => [...row]);
+    m[0][column] = values[0];
+    m[1][column] = values[1];
+    m[2][column] = values[2];
+    return (
+      m[0][0] * (m[1][1] * m[2][2] - m[1][2] * m[2][1]) -
+      m[0][1] * (m[1][0] * m[2][2] - m[1][2] * m[2][0]) +
+      m[0][2] * (m[1][0] * m[2][1] - m[1][1] * m[2][0])
+    );
+  };
+
+  const values = [target.protein, target.carbs, target.fat];
+  return foods.map((food, index) => ({
+    ...food,
+    grams: Math.max(0, Math.round(detFor(index, values) / det))
+  }));
+}
+
+function macrosForFoods(items) {
+  return items.reduce((total, item) => ({
+    protein: total.protein + item.grams * item.protein,
+    carbs: total.carbs + item.grams * item.carbs,
+    fat: total.fat + item.grams * item.fat
+  }), { protein: 0, carbs: 0, fat: 0 });
+}
+
+function plannerTargetsFromForm(form) {
+  const data = Object.fromEntries(new FormData(form));
+  return {
+    calories: number(data.calories),
+    protein: number(data.protein),
+    carbs: number(data.carbs),
+    fat: number(data.fat),
+    meals: number(data.meals) || 4
+  };
+}
+
+function buildExactPlan(target) {
+  const selected = exactPlannerMeals.slice(0, target.meals);
+  const splitTotal = selected.reduce((total, meal) => total + meal.split, 0);
+
+  const meals = selected.map((meal) => {
+    const ratio = meal.split / splitTotal;
+    const mealTarget = {
+      calories: target.calories * ratio,
+      protein: target.protein * ratio,
+      carbs: target.carbs * ratio,
+      fat: target.fat * ratio
+    };
+    const foods = solveThreeFoods(mealTarget, meal.foods) || [];
+    const totals = macrosForFoods(foods);
+
+    return { ...meal, target: mealTarget, foods, totals };
+  });
+
+  const totals = meals.reduce((sumTotal, meal) => ({
+    protein: sumTotal.protein + meal.totals.protein,
+    carbs: sumTotal.carbs + meal.totals.carbs,
+    fat: sumTotal.fat + meal.totals.fat
+  }), { protein: 0, carbs: 0, fat: 0 });
+
+  totals.calories = totals.protein * 4 + totals.carbs * 4 + totals.fat * 9;
+  return { meals, totals };
+}
+
+function renderExactPlanner(target) {
+  const plan = buildExactPlan(target);
+  const diff = {
+    calories: Math.round(plan.totals.calories - target.calories),
+    protein: Math.round(plan.totals.protein - target.protein),
+    carbs: Math.round(plan.totals.carbs - target.carbs),
+    fat: Math.round(plan.totals.fat - target.fat)
+  };
+
+  qs("#exactPlannerSummary").innerHTML = `
+    <div class="plan-summary exact-summary-grid">
+      <span>${Math.round(plan.totals.calories)}/${target.calories} kcal <small>${diff.calories >= 0 ? "+" : ""}${diff.calories}</small></span>
+      <span>${Math.round(plan.totals.protein)}/${target.protein}g eiwit <small>${diff.protein >= 0 ? "+" : ""}${diff.protein}</small></span>
+      <span>${Math.round(plan.totals.carbs)}/${target.carbs}g carbs <small>${diff.carbs >= 0 ? "+" : ""}${diff.carbs}</small></span>
+      <span>${Math.round(plan.totals.fat)}/${target.fat}g vet <small>${diff.fat >= 0 ? "+" : ""}${diff.fat}</small></span>
+    </div>
   `;
-}
 
-function renderMealLibrary() {
-  qs("#mealLibrary").innerHTML = standardMeals.map((meal, index) => mealCardTemplate(meal, index)).join("");
-}
+  const todayFoods = plan.meals.flatMap((meal) => [
+    ...meal.foods
+      .filter((food) => food.grams > 0)
+      .map((food) => ({
+        meal: meal.title,
+        name: food.name,
+        grams: food.grams,
+        note: food.unit
+      })),
+    ...(meal.extra ? [{
+      meal: meal.title,
+      name: meal.extra.name,
+      grams: meal.extra.grams,
+      note: "extra volume"
+    }] : [])
+  ]);
 
-function renderMealDetails(index) {
-  const meal = standardMeals[index];
-  if (!meal) return;
-
-  qs("#mealDetails").innerHTML = `
-    <div class="meal-detail-card">
-      <div class="meal-detail-head">
-        <div>
-          <span class="plan-tag">${escapeHtml(meal.type)}</span>
-          <h3>${escapeHtml(meal.name)}</h3>
-          <p>${meal.calories} kcal · ${meal.protein}g eiwit · ${meal.carbs}g carbs · ${meal.fat}g vet</p>
+  qs("#todayFoodList").innerHTML = `
+    <div class="today-food-head">
+      <strong>Alle voeding voor vandaag</strong>
+      <small>${todayFoods.length} producten gebaseerd op jouw macro-invoer</small>
+    </div>
+    <div class="today-food-grid">
+      ${todayFoods.map((food) => `
+        <div class="today-food-row">
+          <div>
+            <strong>${escapeHtml(food.name)}</strong>
+            <span>${escapeHtml(food.meal)} · ${escapeHtml(food.note)}</span>
+          </div>
+          <output>${food.grams}g</output>
         </div>
-        <button class="primary-button" type="button" data-add-meal="${index}">Log maaltijd</button>
+      `).join("")}
+    </div>
+  `;
+
+  qs("#exactPlannerOutput").innerHTML = plan.meals.map((meal) => `
+    <article class="exact-meal-card">
+      <div class="exact-meal-head">
+        <div>
+          <span class="plan-tag">${Math.round(meal.target.calories)} kcal</span>
+          <h3>${escapeHtml(meal.title)}</h3>
+        </div>
+        <small>${Math.round(meal.totals.protein)}g eiwit · ${Math.round(meal.totals.carbs)}g carbs · ${Math.round(meal.totals.fat)}g vet</small>
       </div>
       <div class="ingredient-list">
-        ${meal.ingredients.map((ingredient) => `
+        ${meal.foods.map((food) => `
           <div class="ingredient-row">
-            <span>${escapeHtml(ingredient.name)}</span>
-            <strong>${ingredient.grams}g</strong>
+            <span>${escapeHtml(food.name)} <small>${escapeHtml(food.unit)}</small></span>
+            <strong>${food.grams}g</strong>
           </div>
         `).join("")}
+        ${meal.extra ? `
+          <div class="ingredient-row muted-row">
+            <span>${escapeHtml(meal.extra.name)} <small>vrij laag in kcal</small></span>
+            <strong>${meal.extra.grams}g</strong>
+          </div>
+        ` : ""}
       </div>
-    </div>
-  `;
+    </article>
+  `).join("");
 }
 
-function calculateMacros(data) {
-  const weight = number(data.weight);
-  const height = number(data.height);
-  const age = number(data.age);
-  const activity = number(data.activity);
-  const bmr = data.sex === "female"
-    ? 10 * weight + 6.25 * height - 5 * age - 161
-    : 10 * weight + 6.25 * height - 5 * age + 5;
-  const maintenance = Math.round(bmr * activity);
-  const calories = data.goal === "cut"
-    ? maintenance - 350
-    : data.goal === "bulk"
-      ? maintenance + 250
-      : maintenance;
-  const protein = Math.round(weight * (data.goal === "cut" ? 2.2 : 2));
-  const fat = Math.round(weight * 0.8);
-  const carbs = Math.max(80, Math.round((calories - protein * 4 - fat * 9) / 4));
-
-  return { calories, protein, carbs, fat, maintenance };
+function fillPlannerFromProfile() {
+  const form = qs("#exactPlannerForm");
+  if (!form) return;
+  form.elements.calories.value = state.profile.calorieGoal;
+  form.elements.protein.value = state.profile.proteinGoal;
+  form.elements.carbs.value = state.profile.carbsGoal;
+  form.elements.fat.value = state.profile.fatGoal;
 }
 
-function renderMacroResult(result) {
-  qs("#macroCalculatorResult").innerHTML = `
-    <div class="macro-result-grid">
-      <article><span>Calorieen</span><strong>${result.calories}</strong><small>Onderhoud: ${result.maintenance}</small></article>
-      <article><span>Eiwit</span><strong>${result.protein}g</strong><small>Dagdoel</small></article>
-      <article><span>Koolhydraten</span><strong>${result.carbs}g</strong><small>Dagdoel</small></article>
-      <article><span>Vet</span><strong>${result.fat}g</strong><small>Dagdoel</small></article>
-    </div>
-  `;
-}
+function renderStoreFoods() {
+  const container = qs("#storeFoodGrid");
+  if (!container) return;
 
-function addStandardMeal(index) {
-  const meal = standardMeals[index];
-  if (!meal) return;
-
-  state.meals.push({
-    id: crypto.randomUUID(),
-    date: todayKey,
-    type: meal.type,
-    name: meal.name,
-    calories: meal.calories,
-    protein: meal.protein,
-    carbs: meal.carbs,
-    fat: meal.fat,
-    barcode: ""
-  });
-  saveState();
-  renderAll();
-}
-
-function generateMealPlan() {
-  const target = calculatedMacros || {
-    calories: number(state.profile.calorieGoal),
-    protein: number(state.profile.proteinGoal),
-    carbs: number(state.profile.carbsGoal),
-    fat: number(state.profile.fatGoal)
-  };
-  const selected = [];
-  let totals = { calories: 0, protein: 0, carbs: 0, fat: 0 };
-  const sortedMeals = [...standardMeals].sort((a, b) => b.protein - a.protein);
-
-  for (const meal of sortedMeals) {
-    if (selected.length >= 5) break;
-    const fitsCalories = totals.calories + meal.calories <= target.calories + 180;
-    const needsProtein = totals.protein < target.protein;
-    const needsCalories = totals.calories < target.calories * 0.92;
-
-    if (fitsCalories && (needsProtein || needsCalories)) {
-      selected.push(meal);
-      totals = {
-        calories: totals.calories + meal.calories,
-        protein: totals.protein + meal.protein,
-        carbs: totals.carbs + meal.carbs,
-        fat: totals.fat + meal.fat
-      };
-    }
-  }
-
-  qs("#mealPlan").innerHTML = `
-    <div class="plan-summary">
-      <span>${totals.calories}/${target.calories} kcal</span>
-      <span>${totals.protein}/${target.protein}g eiwit</span>
-      <span>${totals.carbs}/${target.carbs}g carbs</span>
-      <span>${totals.fat}/${target.fat}g vet</span>
-    </div>
-    <div class="meal-library">
-      ${selected.map((meal) => mealCardTemplate(meal, standardMeals.indexOf(meal))).join("")}
-    </div>
-  `;
+  container.innerHTML = storeFoods.map((food) => `
+    <article class="store-food-card">
+      <div>
+        <span class="plan-tag">${escapeHtml(food.type)}</span>
+        <h3>${escapeHtml(food.name)}</h3>
+        <p>${escapeHtml(food.use)}</p>
+      </div>
+      <div class="store-food-meta">
+        <strong>${escapeHtml(food.macros)}</strong>
+        <small>${escapeHtml(food.tip)}</small>
+      </div>
+    </article>
+  `).join("");
 }
 
 function renderPlan() {
   renderTrainingRecommendations();
   renderGymPrograms();
-  renderMealLibrary();
-  if (!qs("#mealDetails").innerHTML.trim()) renderMealDetails(0);
-  if (!qs("#mealPlan").innerHTML.trim()) generateMealPlan();
+}
+
+function renderMealPlanner() {
+  fillPlannerFromProfile();
+  renderExactPlanner(plannerTargetsFromForm(qs("#exactPlannerForm")));
+  renderStoreFoods();
 }
 
 function renderAll() {
@@ -983,6 +1029,7 @@ function renderAll() {
   renderGym();
   renderProgress();
   renderPlan();
+  renderMealPlanner();
   renderProfile();
 }
 
@@ -1065,24 +1112,6 @@ function handleProfileSubmit(event) {
   saveState();
   renderAll();
   switchView("dashboard");
-}
-
-function handleFeedbackSubmit(event) {
-  event.preventDefault();
-  const data = Object.fromEntries(new FormData(event.currentTarget));
-  state.feedback = state.feedback || [];
-  state.feedback.push({
-    id: crypto.randomUUID(),
-    date: todayKey,
-    tester: data.tester,
-    area: data.area,
-    rating: number(data.rating),
-    message: data.message
-  });
-  saveState();
-  event.currentTarget.reset();
-  qs("#feedbackStatus").textContent = "Feedback opgeslagen.";
-  renderFeedback();
 }
 
 function setScannerStatus(message) {
@@ -1364,16 +1393,18 @@ function bindEvents() {
   qs("#workoutForm").addEventListener("submit", handleWorkoutSubmit);
   qs("#weightForm").addEventListener("submit", handleWeightSubmit);
   qs("#profileForm").addEventListener("submit", handleProfileSubmit);
-  qs("#feedbackForm").addEventListener("submit", handleFeedbackSubmit);
+  qs("#exactPlannerForm").addEventListener("submit", (event) => {
+    event.preventDefault();
+    renderExactPlanner(plannerTargetsFromForm(event.currentTarget));
+  });
+  qs("#useProfileMacros").addEventListener("click", () => {
+    fillPlannerFromProfile();
+    renderExactPlanner(plannerTargetsFromForm(qs("#exactPlannerForm")));
+  });
   qs("#clearMeals").addEventListener("click", () => clearCollection("meals"));
   qs("#clearWorkouts").addEventListener("click", () => clearCollection("workouts"));
   qs("#layoutToggle").addEventListener("click", () => {
     uiSettings.layout = uiSettings.layout === "web" ? "app" : "web";
-    saveUiSettings();
-    applyUiSettings();
-  });
-  qs("#themeToggle").addEventListener("click", () => {
-    uiSettings.theme = uiSettings.theme === "light" ? "dark" : "light";
     saveUiSettings();
     applyUiSettings();
   });
@@ -1384,60 +1415,6 @@ function bindEvents() {
     if (!button) return;
     selectedProgramId = button.dataset.program;
     renderGymPrograms();
-  });
-  qs("#macroCalculatorForm").addEventListener("submit", (event) => {
-    event.preventDefault();
-    const data = Object.fromEntries(new FormData(event.currentTarget));
-    calculatedMacros = calculateMacros(data);
-    state.profile.calorieGoal = calculatedMacros.calories;
-    state.profile.proteinGoal = calculatedMacros.protein;
-    state.profile.carbsGoal = calculatedMacros.carbs;
-    state.profile.fatGoal = calculatedMacros.fat;
-    saveState();
-    renderMacroResult(calculatedMacros);
-    generateMealPlan();
-    renderDashboard();
-    renderProfile();
-  });
-  qs("#generateMealPlan").addEventListener("click", generateMealPlan);
-  qs("#mealLibrary").addEventListener("click", (event) => {
-    const button = event.target.closest("[data-add-meal]");
-    if (button) {
-      addStandardMeal(number(button.dataset.addMeal));
-      return;
-    }
-
-    const card = event.target.closest("[data-show-meal]");
-    if (card) renderMealDetails(number(card.dataset.showMeal));
-  });
-  qs("#mealLibrary").addEventListener("keydown", (event) => {
-    if (event.key !== "Enter" && event.key !== " ") return;
-    const card = event.target.closest("[data-show-meal]");
-    if (!card) return;
-    event.preventDefault();
-    renderMealDetails(number(card.dataset.showMeal));
-  });
-  qs("#mealPlan").addEventListener("click", (event) => {
-    const button = event.target.closest("[data-add-meal]");
-    if (button) {
-      addStandardMeal(number(button.dataset.addMeal));
-      return;
-    }
-
-    const card = event.target.closest("[data-show-meal]");
-    if (card) renderMealDetails(number(card.dataset.showMeal));
-  });
-  qs("#mealPlan").addEventListener("keydown", (event) => {
-    if (event.key !== "Enter" && event.key !== " ") return;
-    const card = event.target.closest("[data-show-meal]");
-    if (!card) return;
-    event.preventDefault();
-    renderMealDetails(number(card.dataset.showMeal));
-  });
-  qs("#mealDetails").addEventListener("click", (event) => {
-    const button = event.target.closest("[data-add-meal]");
-    if (!button) return;
-    addStandardMeal(number(button.dataset.addMeal));
   });
   qs("#startScanner").addEventListener("click", startScanner);
   qs("#stopScanner").addEventListener("click", stopScanner);

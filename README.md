@@ -18,10 +18,12 @@ FitFuel Tracker is een PWA voor gymtracking, voeding, macro's, progressie en bar
 - PWA manifest en service worker
 - Offline cache voor lokale appbestanden
 - Schakelaar tussen appversie en webversie
-- White mode en dark mode
-- Plan-tabblad voor gym/les advies, gymschema's, standaardgerechten, macrocalculator en eetschema
+- Een vaste lichte, neutrale appstijl
+- Plan-tabblad voor gym/les advies en gymschema's
+- Eetplanner-tabblad dat macro-invoer omzet naar een daglijst met voeding en grammen per maaltijd
+- Makkelijke winkelopties voor snelle eiwit-, koolhydraat-, vet- en complete maaltijden
 - Gymschema's van beginner naar advanced met voorbeeld-oefeningen per trainingsdag
-- Tester feedbackformulier met lokale feedbacklijst
+- Feedbackpagina die websitefeedback via e-mail verstuurt
 
 ## Projectmap
 
@@ -171,7 +173,7 @@ Bevat de app-logica:
 - Gewicht opslaan
 - Grafieken renderen
 - Gymschema's tonen van beginner naar advanced
-- Tester feedback opslaan en tonen
+- Websitefeedback via e-mailformulier versturen
 - Barcode scanning
 - Product lookup
 - PWA install prompt
@@ -206,12 +208,14 @@ http://127.0.0.1:4173/index.html?v=line-v11
 - Barcode scanner heeft live, foto en handmatige fallback
 - Footer/navigatie is responsief
 - App kan schakelen tussen compacte app-layout en brede web-layout
-- White mode is beschikbaar via de knop bovenin
+- De app gebruikt een vaste lichte, neutrale stijl
+- Overbodige oude thema-CSS, decoratieve elementen en dubbele foodsecties zijn opgeruimd
 - Nieuw Plan-tabblad bevat trainingstype advies voor gym, pilates, Hyrox en fat loss
 - Standaardgerechten kunnen direct gelogd worden
 - Standaardgerechten zijn klikbaar en tonen ingredienten met grammen per voedsel
-- Testers kunnen feedback opslaan in het profielscherm
-- Macrocalculator kan doelen berekenen en een eetschema genereren
+- Testers kunnen websitefeedback mailen via de Feedback-pagina
+- Eetplanner toont "Dit kan je eten vandaag" met alle voeding die past bij ingevulde calorieen, eiwit, koolhydraten en vet
+- Eetplanner toont ook handige kant-en-klare supermarktopties
 - Lokale preview werkt via `127.0.0.1:4173`
 - Telefoonpreview kan via HTTPS-script
 - Git remote is gekoppeld

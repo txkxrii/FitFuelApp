@@ -9,9 +9,9 @@
     <link rel="manifest" href="manifest.webmanifest">
     <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="icons/icon.svg">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=lean-v27">
   </head>
-  <body data-layout="app" data-theme="dark">
+  <body data-layout="app">
     <div class="app-shell">
       <aside class="sidebar" aria-label="Hoofdnavigatie">
         <div class="brand">
@@ -32,27 +32,27 @@
 
       <nav class="nav-tabs" aria-label="App onderdelen">
         <button class="nav-tab active" type="button" data-view="dashboard" aria-pressed="true">
-          <span class="icon" aria-hidden="true">⌂</span>
           Dashboard
         </button>
         <button class="nav-tab" type="button" data-view="food" aria-pressed="false">
-          <span class="icon" aria-hidden="true">◌</span>
           Food
         </button>
         <button class="nav-tab" type="button" data-view="gym" aria-pressed="false">
-          <span class="icon" aria-hidden="true">▥</span>
           Gym
         </button>
         <button class="nav-tab" type="button" data-view="progress" aria-pressed="false">
-          <span class="icon" aria-hidden="true">⌁</span>
           Progressie
         </button>
         <button class="nav-tab" type="button" data-view="plan" aria-pressed="false">
-          <span class="icon" aria-hidden="true">◇</span>
           Plan
         </button>
+        <button class="nav-tab" type="button" data-view="mealPlanner" aria-pressed="false">
+          Eetplanner
+        </button>
+        <button class="nav-tab" type="button" data-view="feedback" aria-pressed="false">
+          Feedback
+        </button>
         <button class="nav-tab" type="button" data-view="profile" aria-pressed="false">
-          <span class="icon" aria-hidden="true">□</span>
           Profiel
         </button>
       </nav>
@@ -65,7 +65,6 @@
           </div>
           <div class="top-actions" aria-label="Weergave instellingen">
             <button class="mode-button" id="layoutToggle" type="button" aria-pressed="false">Webversie</button>
-            <button class="mode-button" id="themeToggle" type="button" aria-pressed="false">White mode</button>
             <div class="date-pill" id="todayLabel"></div>
           </div>
         </header>
@@ -79,16 +78,6 @@
               <div class="hero-meta">
                 <span id="motivationSource">FitFuel mindset</span>
                 <span id="motivationFocus">Vandaag: voeding, training, progressie.</span>
-              </div>
-            </div>
-            <div class="plate-visual" aria-hidden="true">
-              <div class="plate">
-                <span class="protein"></span>
-                <span class="carbs"></span>
-                <span class="fat"></span>
-              </div>
-              <div class="barbell">
-                <span></span>
               </div>
             </div>
           </div>
@@ -360,69 +349,68 @@
             <div class="program-details" id="programDetails"></div>
           </section>
 
+        </section>
+
+        <section class="view" id="mealPlanner" aria-labelledby="meal-planner-title">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Exact eetschema</p>
+              <h2 id="meal-planner-title">Bereken wat je moet eten</h2>
+            </div>
+          </div>
+
           <section class="panel">
             <div class="panel-head">
               <div>
-                <h2>Macro calculator</h2>
-                <p class="panel-copy">Bereken je dagdoel en maak daarna een eetschema.</p>
+                <h2>Macro invoer</h2>
+                <p class="panel-copy">Vul je dagdoel in. De app verdeelt dit over maaltijden en rekent grammen per product uit.</p>
               </div>
             </div>
-            <form class="form-grid calculator-grid" id="macroCalculatorForm">
-              <label>Geslacht
-                <select name="sex">
-                  <option value="male">Man</option>
-                  <option value="female">Vrouw</option>
+            <form class="form-grid planner-grid" id="exactPlannerForm">
+              <label>Calorieen
+                <input name="calories" type="number" min="1000" step="10" required>
+              </label>
+              <label>Eiwit g
+                <input name="protein" type="number" min="40" step="1" required>
+              </label>
+              <label>Koolhydraten g
+                <input name="carbs" type="number" min="40" step="1" required>
+              </label>
+              <label>Vet g
+                <input name="fat" type="number" min="20" step="1" required>
+              </label>
+              <label>Maaltijden
+                <select name="meals">
+                  <option value="3">3 maaltijden</option>
+                  <option value="4" selected>4 maaltijden</option>
+                  <option value="5">5 maaltijden</option>
                 </select>
               </label>
-              <label>Leeftijd
-                <input name="age" type="number" min="13" max="90" value="25">
-              </label>
-              <label>Lengte cm
-                <input name="height" type="number" min="120" max="230" value="180">
-              </label>
-              <label>Gewicht kg
-                <input name="weight" type="number" min="35" max="250" step="0.1" value="82">
-              </label>
-              <label>Activiteit
-                <select name="activity">
-                  <option value="1.2">Laag</option>
-                  <option value="1.375">Licht actief</option>
-                  <option value="1.55" selected>Gemiddeld actief</option>
-                  <option value="1.725">Zeer actief</option>
-                </select>
-              </label>
-              <label>Doel
-                <select name="goal">
-                  <option value="cut">Afvallen</option>
-                  <option value="maintain">Onderhoud</option>
-                  <option value="bulk" selected>Spiermassa</option>
-                </select>
-              </label>
-              <button class="primary-button" type="submit">Bereken macro's</button>
+              <button class="primary-button" type="submit">Bereken schema</button>
             </form>
-            <div class="macro-result" id="macroCalculatorResult"></div>
           </section>
 
           <section class="panel">
             <div class="panel-head">
               <div>
-                <h2>Standaard gerechten</h2>
-                <p class="panel-copy">Gebruik vaste maaltijden om snel je macro's te halen.</p>
+                <h2>Dit kan je eten vandaag</h2>
+                <p class="panel-copy">Deze voeding en hoeveelheden passen bij de macro's die je hebt ingevuld.</p>
               </div>
-              <button class="ghost-button small" id="generateMealPlan" type="button">Maak schema</button>
+              <button class="ghost-button small" id="useProfileMacros" type="button">Gebruik profiel</button>
             </div>
-            <div class="meal-library" id="mealLibrary"></div>
-            <div class="meal-details" id="mealDetails"></div>
+            <div class="exact-summary" id="exactPlannerSummary"></div>
+            <div class="today-food-list" id="todayFoodList"></div>
+            <div class="exact-plan" id="exactPlannerOutput"></div>
           </section>
 
           <section class="panel">
             <div class="panel-head">
               <div>
-                <h2>Eetschema</h2>
-                <p class="panel-copy">Schema wordt gemaakt op basis van je macrodoel en standaardgerechten.</p>
+                <h2>Makkelijke winkelopties</h2>
+                <p class="panel-copy">Kant-en-klare of snelle producten die handig zijn om je macro's te halen.</p>
               </div>
             </div>
-            <div class="meal-plan" id="mealPlan"></div>
+            <div class="store-food-grid" id="storeFoodGrid"></div>
           </section>
         </section>
 
@@ -466,31 +454,47 @@
             </label>
             <button class="primary-button" type="submit">Profiel opslaan</button>
           </form>
+        </section>
 
-          <section class="panel feedback-panel">
+        <section class="view" id="feedback" aria-labelledby="feedback-title">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Website feedback</p>
+              <h2 id="feedback-title">Laat weten wat beter kan</h2>
+            </div>
+          </div>
+
+          <section class="panel">
             <div class="panel-head">
               <div>
-                <h2>Tester feedback</h2>
-                <p class="panel-copy">Laat testers snel melden wat werkt, wat mist en wat verwarrend is.</p>
+                <h2>Feedbackformulier</h2>
+                <p class="panel-copy">Feedback wordt via e-mail verstuurd naar de beheerder van deze app.</p>
               </div>
             </div>
-            <form class="feedback-form" id="feedbackForm">
-              <label>Naam tester
-                <input name="tester" required placeholder="Bijv. Sam">
+            <form class="feedback-form" action="https://formsubmit.co/damelsio.harryson@hva.nl" method="POST">
+              <input type="hidden" name="_subject" value="Nieuwe FitFuel feedback">
+              <input type="hidden" name="_captcha" value="false">
+              <input type="hidden" name="_template" value="table">
+              <label>Naam
+                <input name="naam" required placeholder="Jouw naam">
+              </label>
+              <label>E-mail
+                <input name="email" type="email" required placeholder="jij@example.com">
               </label>
               <label>Onderdeel
-                <select name="area">
+                <select name="onderdeel">
                   <option>Algemeen</option>
                   <option>Dashboard</option>
                   <option>Foodtracker</option>
                   <option>Barcode scanner</option>
                   <option>Gymtracker</option>
-                  <option>Plan tab</option>
+                  <option>Plan</option>
+                  <option>Eetplanner</option>
                   <option>Design</option>
                 </select>
               </label>
               <label>Score
-                <select name="rating">
+                <select name="score">
                   <option value="5">5 - heel goed</option>
                   <option value="4">4 - goed</option>
                   <option value="3">3 - oké</option>
@@ -499,17 +503,15 @@
                 </select>
               </label>
               <label class="full-field">Feedback
-                <textarea name="message" required rows="4" placeholder="Wat moet beter of duidelijker?"></textarea>
+                <textarea name="feedback" required rows="5" placeholder="Wat werkt goed, wat is onduidelijk, of wat mist er?"></textarea>
               </label>
-              <button class="primary-button" type="submit">Feedback opslaan</button>
-              <p class="form-status" id="feedbackStatus" role="status"></p>
+              <button class="primary-button" type="submit">Verstuur feedback</button>
             </form>
-            <div class="list feedback-list" id="feedbackList"></div>
           </section>
         </section>
       </main>
     </div>
 
-    <script src="app.js" defer></script>
+    <script src="app.js?v=lean-v27" defer></script>
   </body>
 </html>
