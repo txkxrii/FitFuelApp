@@ -24,7 +24,6 @@ const defaultState = {
   ]
 };
 
-let installPrompt = null;
 let state = loadState();
 let uiSettings = loadUiSettings();
 let scannerStream = null;
@@ -1300,7 +1299,7 @@ async function startScanner() {
   qs("#scannerResult").innerHTML = "";
 
   if (!window.isSecureContext) {
-    setScannerStatus("Camera is geblokkeerd op onbeveiligde adressen. Gebruik HTTPS, localhost op hetzelfde apparaat, of installeer de PWA.");
+    setScannerStatus("Camera is geblokkeerd op onbeveiligde adressen. Gebruik HTTPS of localhost op hetzelfde apparaat.");
     return;
   }
 
@@ -1428,31 +1427,11 @@ function bindEvents() {
   });
 }
 
-window.addEventListener("beforeinstallprompt", (event) => {
-  event.preventDefault();
-  installPrompt = event;
-  qs("#installButton").hidden = false;
-});
-
-qs("#installButton").addEventListener("click", async () => {
-  if (!installPrompt) return;
-  installPrompt.prompt();
-  await installPrompt.userChoice;
-  installPrompt = null;
-  qs("#installButton").hidden = true;
-});
-
 if ("serviceWorker" in navigator) {
-  let refreshing = false;
-  navigator.serviceWorker.addEventListener("controllerchange", () => {
-    if (refreshing) return;
-    refreshing = true;
-    window.location.reload();
-  });
-
-  window.addEventListener("load", async () => {
-    const registration = await navigator.serviceWorker.register("sw.js");
-    registration.update();
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.getRegistrations()
+      .then((registrations) => Promise.all(registrations.map((registration) => registration.unregister())))
+      .catch(() => {});
   });
 }
 

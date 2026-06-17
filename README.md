@@ -1,6 +1,6 @@
 # FitFuel Tracker
 
-FitFuel Tracker is een PWA voor gymtracking, voeding, macro's, progressie en barcode scanning. De app is gebouwd als een mobiele app-interface met een rustig sportthema: neutrale stone-tinten met sage groen en zacht blauw als accenten.
+FitFuel Tracker is een responsive website voor gymtracking, voeding, macro's, progressie en barcode scanning. De site is gebouwd als een mobiele app-interface met een rustig sportthema: neutrale stone-tinten met sage groen en zacht blauw als accenten.
 
 ## Functies
 
@@ -15,8 +15,6 @@ FitFuel Tracker is een PWA voor gymtracking, voeding, macro's, progressie en bar
 - Lijn-grafieken voor calorieen, workout volume, calorie trend en gewichtstrend
 - Macroverdeling met eiwit, koolhydraten en vetten
 - Lokale opslag via `localStorage`
-- PWA manifest en service worker
-- Offline cache voor lokale appbestanden
 - Schakelaar tussen appversie en webversie
 - Een vaste lichte, neutrale appstijl
 - Plan-tabblad voor gym/les advies en gymschema's
@@ -32,7 +30,6 @@ gym-food-pwa/
   app.js
   index.html
   styles.css
-  manifest.webmanifest
   sw.js
   icons/
     icon.svg
@@ -63,7 +60,6 @@ Alternatief: open `start-preview.command`.
 Camera's op telefoons werken alleen betrouwbaar via een veilige origin:
 
 - `https`
-- een geinstalleerde PWA
 - `localhost` op hetzelfde apparaat
 
 Voor testen op een telefoon is er een HTTPS-previewscript:
@@ -176,15 +172,11 @@ Bevat de app-logica:
 - Websitefeedback via e-mailformulier versturen
 - Barcode scanning
 - Product lookup
-- PWA install prompt
+- Oude service worker cleanup voor bezoekers met eerdere PWA-versies
 
 ### `sw.js`
 
-Service worker voor offline cache en snelle reloads.
-
-### `manifest.webmanifest`
-
-PWA-configuratie voor naam, kleur, icon en app-installatie.
+Cleanup-bestand dat oude caches en oude service workers opruimt. De website werkt daarna zonder download/installatie.
 
 ## Cache Refresh
 
@@ -202,7 +194,7 @@ http://127.0.0.1:4173/index.html?v=line-v11
 
 ## Huidige Status
 
-- App is gebouwd als PWA
+- Website werkt zonder download of installatie
 - Thema is minimalistisch met neutrale kleuren en sage groen als accent
 - Grafieken zijn lijngrafieken
 - Barcode scanner heeft live, foto en handmatige fallback

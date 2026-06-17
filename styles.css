@@ -694,13 +694,8 @@ body[data-layout="web"] .sidebar {
   display: block;
 }
 
-.brand small,
-.install-panel p {
+.brand small {
   color: var(--muted);
-}
-
-.install-panel {
-  margin-top: auto;
 }
 
 body[data-layout="web"] .nav-tabs {
