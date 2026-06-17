@@ -1,4 +1,4 @@
-const CACHE_NAME = "fitfuel-web-cleanup-v29";
+const CACHE_NAME = "fitfuel-web-cleanup-v30";
 
 self.addEventListener("install", () => {
   self.skipWaiting();

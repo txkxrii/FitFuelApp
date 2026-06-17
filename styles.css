@@ -47,7 +47,7 @@ button {
 .content {
   width: min(100%, 1120px);
   margin: 0 auto;
-  padding: 20px 16px 96px;
+  padding: 20px 16px 40px;
 }
 
 .topbar,
@@ -112,23 +112,26 @@ h4 {
 }
 
 .nav-tabs {
-  position: fixed;
+  position: sticky;
   z-index: 20;
-  left: 50%;
-  bottom: 12px;
-  width: min(calc(100% - 24px), 720px);
-  transform: translateX(-50%);
-  display: grid;
-  grid-template-columns: repeat(8, minmax(0, 1fr));
+  top: 0;
+  display: flex;
   gap: 6px;
+  width: 100%;
   padding: 8px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
+  overflow-x: auto;
+  border: 0;
+  border-bottom: 1px solid var(--line);
   background: var(--surface);
+  scrollbar-width: none;
+}
+
+.nav-tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .nav-tab {
-  min-width: 0;
+  flex: 0 0 auto;
   min-height: 42px;
   border: 0;
   border-radius: 8px;
@@ -136,6 +139,7 @@ h4 {
   color: var(--muted);
   font-size: 0.76rem;
   font-weight: 800;
+  padding: 0 12px;
 }
 
 .nav-tab.active,
@@ -701,11 +705,7 @@ body[data-layout="web"] .sidebar {
 body[data-layout="web"] .nav-tabs {
   position: sticky;
   top: 0;
-  left: auto;
-  bottom: auto;
-  width: auto;
-  transform: none;
-  grid-template-columns: repeat(8, minmax(0, auto));
+  width: 100%;
   border-radius: 0;
   border-width: 0 0 1px;
 }
@@ -741,7 +741,7 @@ body[data-layout="web"] .content {
 
 @media (max-width: 620px) {
   .content {
-    padding: 16px 12px 100px;
+    padding: 16px 12px 32px;
   }
 
   .topbar,
@@ -769,8 +769,9 @@ body[data-layout="web"] .content {
     grid-template-columns: 1fr;
   }
 
-  .nav-tabs,
-  body[data-layout="web"] .nav-tabs {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+  .nav-tab {
+    min-height: 38px;
+    padding: 0 12px;
+    font-size: 0.74rem;
   }
 }
