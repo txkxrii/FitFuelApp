@@ -1,6 +1,5 @@
 const todayKey = new Date().toISOString().slice(0, 10);
 const storageKey = "fitfuel-pwa-state";
-const settingsKey = "fitfuel-pwa-settings";
 
 const defaultState = {
   profile: {
@@ -25,7 +24,6 @@ const defaultState = {
 };
 
 let state = loadState();
-let uiSettings = loadUiSettings();
 let scannerStream = null;
 let scannerActive = false;
 let detector = null;
@@ -446,35 +444,9 @@ function loadState() {
   }
 }
 
-function loadUiSettings() {
-  const saved = localStorage.getItem(settingsKey);
-  if (!saved) return { layout: "app" };
-
-  try {
-    const settings = JSON.parse(saved);
-    return {
-      layout: settings.layout === "web" ? "web" : "app"
-    };
-  } catch {
-    return { layout: "app" };
-  }
-}
-
-function saveUiSettings() {
-  localStorage.setItem(settingsKey, JSON.stringify(uiSettings));
-}
-
 function applyUiSettings() {
-  document.body.dataset.layout = uiSettings.layout;
+  document.body.dataset.layout = "web";
   qs("meta[name='theme-color']").setAttribute("content", "#f3f1ec");
-
-  const layoutToggle = qs("#layoutToggle");
-
-  if (layoutToggle) {
-    const webMode = uiSettings.layout === "web";
-    layoutToggle.textContent = webMode ? "Appversie" : "Webversie";
-    layoutToggle.setAttribute("aria-pressed", String(webMode));
-  }
 }
 
 function saveState() {
@@ -1402,11 +1374,6 @@ function bindEvents() {
   });
   qs("#clearMeals").addEventListener("click", () => clearCollection("meals"));
   qs("#clearWorkouts").addEventListener("click", () => clearCollection("workouts"));
-  qs("#layoutToggle").addEventListener("click", () => {
-    uiSettings.layout = uiSettings.layout === "web" ? "app" : "web";
-    saveUiSettings();
-    applyUiSettings();
-  });
   qs("#findTrainingButton").addEventListener("click", renderTrainingRecommendations);
   qs("#trainingGoal").addEventListener("change", renderTrainingRecommendations);
   qs("#programTabs").addEventListener("click", (event) => {
