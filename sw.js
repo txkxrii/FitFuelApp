@@ -1,4 +1,4 @@
-const CACHE_NAME = "fitfuel-pwa-v27";
+const CACHE_NAME = "fitfuel-pwa-v28";
 const ASSETS = [
   "./",
   "./index.html",
@@ -26,16 +26,19 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
+  const url = new URL(event.request.url);
+  if (url.origin !== self.location.origin) return;
 
   if (event.request.mode === "navigate") {
     event.respondWith(
-      fetch(event.request).catch(() => caches.match("./index.html"))
+      fetch(event.request, { cache: "no-store" }).catch(() => caches.match("./index.html"))
     );
     return;
   }
 
   event.respondWith(
-    fetch(event.request).then((response) => {
+    fetch(event.request, { cache: "no-store" }).then((response) => {
+      if (!response || response.status !== 200) return response;
       const copy = response.clone();
       caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
       return response;
