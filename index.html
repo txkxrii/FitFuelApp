@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#060606">
+    <meta name="theme-color" content="#f3f1ec">
     <meta name="description" content="PWA voor gymtracking, voeding, macro's en progressie.">
     <title>FitFuel Tracker</title>
     <link rel="manifest" href="manifest.webmanifest">
@@ -466,6 +466,46 @@
             </label>
             <button class="primary-button" type="submit">Profiel opslaan</button>
           </form>
+
+          <section class="panel feedback-panel">
+            <div class="panel-head">
+              <div>
+                <h2>Tester feedback</h2>
+                <p class="panel-copy">Laat testers snel melden wat werkt, wat mist en wat verwarrend is.</p>
+              </div>
+            </div>
+            <form class="feedback-form" id="feedbackForm">
+              <label>Naam tester
+                <input name="tester" required placeholder="Bijv. Sam">
+              </label>
+              <label>Onderdeel
+                <select name="area">
+                  <option>Algemeen</option>
+                  <option>Dashboard</option>
+                  <option>Foodtracker</option>
+                  <option>Barcode scanner</option>
+                  <option>Gymtracker</option>
+                  <option>Plan tab</option>
+                  <option>Design</option>
+                </select>
+              </label>
+              <label>Score
+                <select name="rating">
+                  <option value="5">5 - heel goed</option>
+                  <option value="4">4 - goed</option>
+                  <option value="3">3 - oké</option>
+                  <option value="2">2 - matig</option>
+                  <option value="1">1 - slecht</option>
+                </select>
+              </label>
+              <label class="full-field">Feedback
+                <textarea name="message" required rows="4" placeholder="Wat moet beter of duidelijker?"></textarea>
+              </label>
+              <button class="primary-button" type="submit">Feedback opslaan</button>
+              <p class="form-status" id="feedbackStatus" role="status"></p>
+            </form>
+            <div class="list feedback-list" id="feedbackList"></div>
+          </section>
         </section>
       </main>
     </div>

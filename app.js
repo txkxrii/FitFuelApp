@@ -21,6 +21,9 @@ const defaultState = {
   ],
   weights: [
     { id: crypto.randomUUID(), date: todayKey, weight: 82, note: "Startmeting" }
+  ],
+  feedback: [
+    { id: crypto.randomUUID(), date: todayKey, tester: "Test gebruiker", area: "Algemeen", rating: 5, message: "De app is duidelijk. Ik wil vooral testen of logs snel genoeg werken." }
   ]
 };
 
@@ -450,7 +453,7 @@ function saveUiSettings() {
 function applyUiSettings() {
   document.body.dataset.layout = uiSettings.layout;
   document.body.dataset.theme = uiSettings.theme;
-  qs("meta[name='theme-color']").setAttribute("content", uiSettings.theme === "light" ? "#f7f7f7" : "#060606");
+  qs("meta[name='theme-color']").setAttribute("content", uiSettings.theme === "light" ? "#f7f6f2" : "#f3f1ec");
 
   const layoutToggle = qs("#layoutToggle");
   const themeToggle = qs("#themeToggle");
@@ -744,6 +747,22 @@ function renderProfile() {
   Object.entries(state.profile).forEach(([key, value]) => {
     if (form.elements[key]) form.elements[key].value = value;
   });
+  renderFeedback();
+}
+
+function feedbackTemplate(item) {
+  return `
+    <div>
+      <strong>${escapeHtml(item.area)} · ${escapeHtml(item.tester)}</strong>
+      <div class="list-meta">${formatDate(item.date)} · score ${item.rating}/5</div>
+      <p class="feedback-message">${escapeHtml(item.message)}</p>
+    </div>
+  `;
+}
+
+function renderFeedback() {
+  const feedback = [...(state.feedback || [])].reverse();
+  renderList(qs("#feedbackList"), feedback, "Nog geen feedback opgeslagen.", feedbackTemplate);
 }
 
 function renderTrainingRecommendations() {
@@ -1048,6 +1067,24 @@ function handleProfileSubmit(event) {
   switchView("dashboard");
 }
 
+function handleFeedbackSubmit(event) {
+  event.preventDefault();
+  const data = Object.fromEntries(new FormData(event.currentTarget));
+  state.feedback = state.feedback || [];
+  state.feedback.push({
+    id: crypto.randomUUID(),
+    date: todayKey,
+    tester: data.tester,
+    area: data.area,
+    rating: number(data.rating),
+    message: data.message
+  });
+  saveState();
+  event.currentTarget.reset();
+  qs("#feedbackStatus").textContent = "Feedback opgeslagen.";
+  renderFeedback();
+}
+
 function setScannerStatus(message) {
   qs("#scannerStatus").textContent = message;
 }
@@ -1327,6 +1364,7 @@ function bindEvents() {
   qs("#workoutForm").addEventListener("submit", handleWorkoutSubmit);
   qs("#weightForm").addEventListener("submit", handleWeightSubmit);
   qs("#profileForm").addEventListener("submit", handleProfileSubmit);
+  qs("#feedbackForm").addEventListener("submit", handleFeedbackSubmit);
   qs("#clearMeals").addEventListener("click", () => clearCollection("meals"));
   qs("#clearWorkouts").addEventListener("click", () => clearCollection("workouts"));
   qs("#layoutToggle").addEventListener("click", () => {

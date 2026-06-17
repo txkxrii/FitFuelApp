@@ -1,6 +1,6 @@
 # FitFuel Tracker
 
-FitFuel Tracker is een PWA voor gymtracking, voeding, macro's, progressie en barcode scanning. De app is gebouwd als een mobiele app-interface met een minimalistisch sportthema: matzwart, wit, grijs en rood als dominante accentkleur.
+FitFuel Tracker is een PWA voor gymtracking, voeding, macro's, progressie en barcode scanning. De app is gebouwd als een mobiele app-interface met een rustig sportthema: neutrale stone-tinten met sage groen en zacht blauw als accenten.
 
 ## Functies
 
@@ -21,6 +21,7 @@ FitFuel Tracker is een PWA voor gymtracking, voeding, macro's, progressie en bar
 - White mode en dark mode
 - Plan-tabblad voor gym/les advies, gymschema's, standaardgerechten, macrocalculator en eetschema
 - Gymschema's van beginner naar advanced met voorbeeld-oefeningen per trainingsdag
+- Tester feedbackformulier met lokale feedbacklijst
 
 ## Projectmap
 
@@ -154,11 +155,11 @@ git push -u origin main
 
 ### `index.html`
 
-Bevat de appstructuur, navigatie, dashboard, foodtracker, gymtracker, progressiepagina, planpagina, profielpagina en scanner UI.
+Bevat de appstructuur, navigatie, dashboard, foodtracker, gymtracker, progressiepagina, planpagina, profielpagina, feedbackformulier en scanner UI.
 
 ### `styles.css`
 
-Bevat de mobiele app-layout, minimalistische rood/zwarte stijl, cards, buttons, footer navigation, scanner styling en lijngrafieken.
+Bevat de mobiele app-layout, neutrale styling, cards, buttons, footer navigation, scanner styling en lijngrafieken.
 
 ### `app.js`
 
@@ -170,6 +171,7 @@ Bevat de app-logica:
 - Gewicht opslaan
 - Grafieken renderen
 - Gymschema's tonen van beginner naar advanced
+- Tester feedback opslaan en tonen
 - Barcode scanning
 - Product lookup
 - PWA install prompt
@@ -199,7 +201,7 @@ http://127.0.0.1:4173/index.html?v=line-v11
 ## Huidige Status
 
 - App is gebouwd als PWA
-- Thema is minimalistisch met rood als dominante kleur
+- Thema is minimalistisch met neutrale kleuren en sage groen als accent
 - Grafieken zijn lijngrafieken
 - Barcode scanner heeft live, foto en handmatige fallback
 - Footer/navigatie is responsief
@@ -208,6 +210,7 @@ http://127.0.0.1:4173/index.html?v=line-v11
 - Nieuw Plan-tabblad bevat trainingstype advies voor gym, pilates, Hyrox en fat loss
 - Standaardgerechten kunnen direct gelogd worden
 - Standaardgerechten zijn klikbaar en tonen ingredienten met grammen per voedsel
+- Testers kunnen feedback opslaan in het profielscherm
 - Macrocalculator kan doelen berekenen en een eetschema genereren
 - Lokale preview werkt via `127.0.0.1:4173`
 - Telefoonpreview kan via HTTPS-script
