@@ -47,7 +47,7 @@ button {
 .content {
   width: min(100%, 1120px);
   margin: 0 auto;
-  padding: 28px 16px 48px;
+  padding: 20px 16px 40px;
 }
 
 .topbar,
@@ -116,18 +116,22 @@ h4 {
   z-index: 20;
   top: 0;
   display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
   gap: 6px;
   width: 100%;
-  padding: 10px 16px;
-  overflow: visible;
+  padding: 8px;
+  overflow-x: auto;
   border: 0;
   border-bottom: 1px solid var(--line);
   background: var(--surface);
+  scrollbar-width: none;
+}
+
+.nav-tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .nav-tab {
+  flex: 0 0 auto;
   min-height: 42px;
   border: 0;
   border-radius: 8px;
@@ -478,7 +482,8 @@ textarea:focus {
 
 .primary-button,
 .ghost-button,
-.text-button {
+.text-button,
+.mode-button {
   min-height: 40px;
   border-radius: 8px;
   padding: 0 13px;
@@ -492,7 +497,8 @@ textarea:focus {
 }
 
 .ghost-button,
-.text-button {
+.text-button,
+.mode-button {
   border: 1px solid var(--line);
   background: var(--surface);
   color: var(--ink);
@@ -657,6 +663,23 @@ textarea:focus {
   border-style: dashed;
 }
 
+body[data-layout="web"] .app-shell {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+}
+
+body[data-layout="web"] .sidebar {
+  position: sticky;
+  top: 0;
+  display: flex;
+  min-height: 100dvh;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+  border-right: 1px solid var(--line);
+  background: var(--surface);
+}
+
 .brand {
   display: flex;
   align-items: center;
@@ -679,6 +702,19 @@ textarea:focus {
   color: var(--muted);
 }
 
+body[data-layout="web"] .nav-tabs {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  border-radius: 0;
+  border-width: 0 0 1px;
+}
+
+body[data-layout="web"] .content {
+  width: 100%;
+  padding-bottom: 32px;
+}
+
 @media (max-width: 980px) {
   .stats-grid,
   .graph-grid,
@@ -693,8 +729,13 @@ textarea:focus {
   }
 
   .program-summary,
-  .program-day-grid {
+  .program-day-grid,
+  body[data-layout="web"] .app-shell {
     grid-template-columns: 1fr;
+  }
+
+  body[data-layout="web"] .sidebar {
+    display: none;
   }
 }
 

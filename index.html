@@ -7,9 +7,9 @@
     <meta name="description" content="Website voor gymtracking, voeding, macro's en progressie.">
     <title>FitFuel Tracker</title>
     <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="styles.css?v=web-v31">
+    <link rel="stylesheet" href="styles.css?v=web-v30">
   </head>
-  <body data-layout="web">
+  <body data-layout="app">
     <div class="app-shell">
       <aside class="sidebar" aria-label="Hoofdnavigatie">
         <div class="brand">
@@ -57,7 +57,8 @@
             <p class="eyebrow">Vandaag</p>
             <h1 id="pageTitle">Dashboard</h1>
           </div>
-          <div class="top-actions" aria-label="Datum">
+          <div class="top-actions" aria-label="Weergave instellingen">
+            <button class="mode-button" id="layoutToggle" type="button" aria-pressed="false">Webversie</button>
             <div class="date-pill" id="todayLabel"></div>
           </div>
         </header>
@@ -505,6 +506,6 @@
       </main>
     </div>
 
-    <script src="app.js?v=web-v31" defer></script>
+    <script src="app.js?v=web-v30" defer></script>
   </body>
 </html>

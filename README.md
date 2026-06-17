@@ -1,6 +1,6 @@
 # FitFuel Tracker
 
-FitFuel Tracker is een website voor gymtracking, voeding, macro's, progressie en barcode scanning. De site gebruikt een rustige desktop-first layout met neutrale stone-tinten, sage groen en zacht blauw als accenten.
+FitFuel Tracker is een responsive website voor gymtracking, voeding, macro's, progressie en barcode scanning. De site is gebouwd als een mobiele app-interface met een rustig sportthema: neutrale stone-tinten met sage groen en zacht blauw als accenten.
 
 ## Functies
 
@@ -15,8 +15,8 @@ FitFuel Tracker is een website voor gymtracking, voeding, macro's, progressie en
 - Lijn-grafieken voor calorieen, workout volume, calorie trend en gewichtstrend
 - Macroverdeling met eiwit, koolhydraten en vetten
 - Lokale opslag via `localStorage`
-- Alleen websiteversie, zonder app/download/install flow
-- Een vaste lichte, neutrale stijl
+- Schakelaar tussen appversie en webversie
+- Een vaste lichte, neutrale appstijl
 - Plan-tabblad voor gym/les advies en gymschema's
 - Eetplanner-tabblad dat macro-invoer omzet naar een daglijst met voeding en grammen per maaltijd
 - Makkelijke winkelopties voor snelle eiwit-, koolhydraat-, vet- en complete maaltijden
@@ -157,7 +157,7 @@ Bevat de appstructuur, navigatie, dashboard, foodtracker, gymtracker, progressie
 
 ### `styles.css`
 
-Bevat de website-layout, neutrale styling, cards, buttons, topnavigatie, scanner styling en lijngrafieken.
+Bevat de mobiele app-layout, neutrale styling, cards, buttons, footer navigation, scanner styling en lijngrafieken.
 
 ### `app.js`
 
@@ -198,9 +198,9 @@ http://127.0.0.1:4173/index.html?v=line-v11
 - Thema is minimalistisch met neutrale kleuren en sage groen als accent
 - Grafieken zijn lijngrafieken
 - Barcode scanner heeft live, foto en handmatige fallback
-- Navigatie staat als websitebalk bovenaan
-- Geen appversie, geen download en geen layout-schakelaar
-- De website gebruikt een vaste lichte, neutrale stijl
+- Footer/navigatie is responsief
+- App kan schakelen tussen compacte app-layout en brede web-layout
+- De app gebruikt een vaste lichte, neutrale stijl
 - Overbodige oude thema-CSS, decoratieve elementen en dubbele foodsecties zijn opgeruimd
 - Nieuw Plan-tabblad bevat trainingstype advies voor gym, pilates, Hyrox en fat loss
 - Standaardgerechten kunnen direct gelogd worden
